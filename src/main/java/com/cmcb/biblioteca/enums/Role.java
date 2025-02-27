@@ -1,0 +1,6 @@
+package com.cmcb.biblioteca.enums;
+
+public enum Role {
+    ROLE_USER,
+    ROLE_ADMIN
+}
