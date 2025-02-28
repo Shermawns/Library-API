@@ -30,6 +30,12 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    public User(String username, String encryptedPassword, Role role) {
+        this.username = username;
+        this.password = encryptedPassword;
+        this.role = role;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.role == Role.ROLE_ADMIN) return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));

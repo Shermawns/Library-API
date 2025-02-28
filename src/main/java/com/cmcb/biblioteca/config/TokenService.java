@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.cmcb.biblioteca.models.User;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,7 +15,8 @@ import java.time.ZoneOffset;
 @Component
 public class TokenService {
 
-    private final String secret = "SKIBIDIFORTNITE";
+    private static final Dotenv dotenv = Dotenv.load();
+    private static final String secret = dotenv.get("SECRET_KEY");
 
     public String generateToken(User user){
         try{
