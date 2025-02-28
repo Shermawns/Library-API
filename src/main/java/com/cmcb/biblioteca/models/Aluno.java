@@ -34,6 +34,11 @@ public class Aluno {
         this.data_atualizacao = data_atualizacao;
     }
 
+    public Aluno(String name, String matricula) {
+        this.nome = name;
+        this.matricula = matricula;
+    }
+
     public Long getId() {
         return id;
     }
