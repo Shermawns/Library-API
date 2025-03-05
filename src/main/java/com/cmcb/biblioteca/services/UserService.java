@@ -41,7 +41,7 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public User editPassword(Long id, String currentPassword, String newPassword, String confirmPassword){
+    public void editPassword(Long id, String currentPassword, String newPassword, String confirmPassword){
 
         User user = findById(id);
 
@@ -56,7 +56,7 @@ public class UserService implements UserDetailsService {
         user.setPassword(passwordEncoder.encode(newPassword));
 
 
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     @Override

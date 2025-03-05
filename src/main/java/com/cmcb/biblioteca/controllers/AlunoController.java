@@ -3,12 +3,14 @@ package com.cmcb.biblioteca.controllers;
 import com.cmcb.biblioteca.dtos.AlunoRequest;
 import com.cmcb.biblioteca.mapper.AlunoMapper;
 import com.cmcb.biblioteca.models.Aluno;
+import com.cmcb.biblioteca.models.User;
 import com.cmcb.biblioteca.services.AlunoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -37,5 +39,6 @@ public class AlunoController {
     public ResponseEntity<List<Aluno>> findAll(){
         return ResponseEntity.ok().body(alunoService.findAll());
     }
+
 
 }
