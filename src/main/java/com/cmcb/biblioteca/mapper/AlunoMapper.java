@@ -12,7 +12,8 @@ public class AlunoMapper {
     public Aluno toAlunoRequest(AlunoRequest alunoRequest){
         return new Aluno(
                 alunoRequest.name(),
-                alunoRequest.matricula()
+                alunoRequest.matricula(),
+                alunoRequest.email()
         );
     }
 }

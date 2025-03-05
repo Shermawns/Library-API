@@ -1,5 +1,6 @@
 package com.cmcb.biblioteca.services;
 
+import com.cmcb.biblioteca.dtos.AlunoRequest;
 import com.cmcb.biblioteca.models.Aluno;
 import com.cmcb.biblioteca.models.User;
 import com.cmcb.biblioteca.repositories.AlunoRepository;
@@ -34,4 +35,29 @@ public class AlunoService {
         }
         return alunoRepository.save(aluno);
     }
+
+    public Aluno update(Long id, AlunoRequest alunoRequest) {
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
+
+        if (alunoRequest.name() != null) {
+            aluno.setNome(alunoRequest.name());
+        }
+        if (alunoRequest.matricula() != null) {
+            aluno.setMatricula(alunoRequest.matricula());
+        }
+        if (alunoRequest.email() != null) {
+            aluno.setEmail(alunoRequest.email());
+        }
+
+        return alunoRepository.save(aluno);
+    }
+
+    public void delete(Long id) {
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
+
+        alunoRepository.delete(aluno);
+    }
+
 }

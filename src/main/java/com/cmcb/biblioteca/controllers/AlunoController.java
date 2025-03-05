@@ -34,11 +34,33 @@ public class AlunoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
+    @PutMapping(value = "/atualizar/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Aluno> update(@PathVariable Long id, @RequestBody AlunoRequest alunoRequest) {
+        Aluno alunoAtualizado = alunoService.update(id, alunoRequest);
+        return ResponseEntity.ok(alunoAtualizado);
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Aluno>> findAll(){
         return ResponseEntity.ok().body(alunoService.findAll());
     }
+
+    @GetMapping(value = "/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Aluno> findById(@PathVariable Long id){
+        Aluno aluno = alunoService.findById(id);
+        return ResponseEntity.ok().body(aluno);
+    }
+
+    @DeleteMapping(value = "/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> delete(@PathVariable Long id) {
+        alunoService.delete(id);
+        return ResponseEntity.ok("Aluno removido com sucesso!");
+    }
+
 
 
 }

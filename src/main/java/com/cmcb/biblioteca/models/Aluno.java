@@ -18,6 +18,7 @@ public class Aluno {
     private Long id;
     private String matricula;
     private String nome;
+    private String email;
     @CreatedDate
     private LocalDate data_criacao;
     @LastModifiedDate
@@ -26,17 +27,19 @@ public class Aluno {
     public Aluno() {
     }
 
-    public Aluno(Long id, String matricula, String nome, LocalDate data_criacao, LocalDate data_atualizacao) {
+    public Aluno(Long id, String matricula, String nome, String email, LocalDate data_criacao, LocalDate data_atualizacao) {
         this.id = id;
         this.matricula = matricula;
         this.nome = nome;
+        this.email = email;
         this.data_criacao = data_criacao;
         this.data_atualizacao = data_atualizacao;
     }
 
-    public Aluno(String name, String matricula) {
+    public Aluno(String name, String matricula, String email) {
         this.nome = name;
         this.matricula = matricula;
+        this.email = email;
     }
 
     public Long getId() {
@@ -77,5 +80,13 @@ public class Aluno {
 
     public void setData_atualizacao(LocalDate data_atualizacao) {
         this.data_atualizacao = data_atualizacao;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
