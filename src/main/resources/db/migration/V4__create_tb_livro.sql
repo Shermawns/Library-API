@@ -1,0 +1,6 @@
+CREATE TABLE tb_livro (
+    id BIGSERIAL PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    codigo BIGINT UNIQUE NOT NULL,
+    status VARCHAR(50) NOT NULL
+);
