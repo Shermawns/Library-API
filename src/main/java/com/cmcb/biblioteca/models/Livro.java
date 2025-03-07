@@ -1,7 +1,11 @@
 package com.cmcb.biblioteca.models;
 
 import com.cmcb.biblioteca.enums.Status;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "tb_livro")
@@ -12,7 +16,11 @@ public class Livro {
     private Long id;
     private String titulo;
     private Long codigo;
+    @Enumerated(EnumType.STRING)
     private Status status;
+    @OneToMany(mappedBy = "livro")
+    @JsonIgnore
+    private Set<Aluguel> alugueis = new HashSet<>();
 
     public Livro() {
     }
@@ -54,5 +62,9 @@ public class Livro {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public Set<Aluguel> getAlugueis() {
+        return alugueis;
     }
 }

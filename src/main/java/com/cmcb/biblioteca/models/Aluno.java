@@ -1,12 +1,16 @@
 package com.cmcb.biblioteca.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Fetch;
 import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "tb_aluno")
@@ -19,6 +23,8 @@ public class Aluno {
     private String matricula;
     private String nome;
     private String email;
+    @OneToMany(mappedBy = "aluno")
+    private Set<Aluguel> alugueis = new HashSet<>();
     @CreatedDate
     private LocalDate data_criacao;
     @LastModifiedDate
@@ -88,5 +94,9 @@ public class Aluno {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Set<Aluguel> getAlugueis() {
+        return alugueis;
     }
 }
