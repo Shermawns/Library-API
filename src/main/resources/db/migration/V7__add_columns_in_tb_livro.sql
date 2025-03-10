@@ -1,0 +1,17 @@
+ALTER TABLE tb_livro
+DROP COLUMN codigo;
+
+ALTER TABLE tb_livro
+ADD COLUMN ISBN VARCHAR(20) UNIQUE;
+
+ALTER TABLE tb_livro
+ADD COLUMN autor VARCHAR(100);
+
+ALTER TABLE tb_livro
+ADD COLUMN editora VARCHAR(100);
+
+ALTER TABLE tb_livro
+ADD COLUMN ano_de_publicacao INT;
+
+ALTER TABLE tb_livro
+ADD COLUMN categoria VARCHAR(50);
