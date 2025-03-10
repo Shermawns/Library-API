@@ -45,14 +45,23 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Código de registro inválido!");
         }
 
-        if (this.userRepository.findByUsername(userRequest.username()) != null)
-            return ResponseEntity.badRequest().build();
+        if (this.userRepository.findByUsername(userRequest.username()) != null) {
+            return ResponseEntity.badRequest().body("Usuário já registrado!");
+        }
+
+        if (!userRequest.password().equals(userRequest.confirmPassword())) {
+            return ResponseEntity.badRequest().body("As senhas não coincidem!");
+        }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(userRequest.password());
+
         User newUser = new User(userRequest.username(), encryptedPassword, userRequest.role());
+
         User saveUser = this.userRepository.save(newUser);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toUserResponse(saveUser));
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Validated LoginRequest data) {
