@@ -37,6 +37,7 @@ interface BookContextType {
   getBookById: (id: string) => Book | undefined;
   getLoanById: (id: string) => Loan | undefined;
   getBookLoans: (bookId: string) => Loan[];
+  cancelLoan: (loanId: string) => Promise<void>;
 }
 
 const BookContext = createContext<BookContextType | undefined>(undefined);
@@ -152,7 +153,6 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       
-    
       
       const newBook: Book = {
         ...bookData,
@@ -189,14 +189,15 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
       }
       
       
-      
       const bookToDelete = books.find(book => book.id === id);
       
       setBooks(prevBooks => prevBooks.filter(book => book.id !== id));
       
       toast({
         title: "Livro removido",
-        description: bookToDelete ? `"${bookToDelete.title}" foi removido da biblioteca` : "Livro removido com sucesso",
+        description: bookToDelete 
+          ? `"${bookToDelete.title}" foi removido da biblioteca` 
+          : "Livro removido com sucesso",
       });
     } catch (error) {
       toast({
@@ -242,7 +243,6 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
       }
       
       
-      
       const today = new Date().toISOString().split('T')[0];
       
       const newLoan: Loan = {
@@ -281,7 +281,6 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       
-    
       // atualizar o emprestimo
       setLoans(prevLoans => 
         prevLoans.map(loan => 
@@ -313,6 +312,42 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
     return loans.filter(loan => loan.bookId === bookId);
   };
 
+  const cancelLoan = async (loanId: string) => {
+    try {
+      setLoading(true);
+      
+      // achar o emprestimo
+      const loan = loans.find(l => l.id === loanId);
+      if (!loan) {
+        throw new Error("Empréstimo não encontrado");
+      }
+      
+      // atualizar emprestimo
+      setBooks(prevBooks => 
+        prevBooks.map(book => 
+          book.id === loan.bookId ? { ...book, available: true } : book
+        )
+      );
+      
+      // remover o emprestimo
+      setLoans(prevLoans => prevLoans.filter(l => l.id !== loanId));
+      
+      toast({
+        title: "Empréstimo cancelado",
+        description: `O empréstimo de "${loan.bookTitle}" foi cancelado com sucesso`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao cancelar empréstimo",
+        description: error instanceof Error ? error.message : "Não foi possível cancelar o empréstimo",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <BookContext.Provider value={{
       books,
@@ -325,7 +360,8 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
       extendLoan,
       getBookById,
       getLoanById,
-      getBookLoans
+      getBookLoans,
+      cancelLoan
     }}>
       {children}
     </BookContext.Provider>

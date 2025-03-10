@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useBooks } from "../contexts/BookContext";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, CheckCircle, AlertCircle, Search } from "lucide-react";
+import { Calendar, CheckCircle, AlertCircle, Search, BookX } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -14,11 +14,23 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 const BookLoans = () => {
-  const { loans } = useBooks();
+  const { loans, cancelLoan } = useBooks();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedLoanId, setSelectedLoanId] = useState<string | null>(null);
+  const { toast } = useToast();
   
   // Filtra emprestimos baseado na search query
   const filteredLoans = loans.filter(loan => 
@@ -74,6 +86,27 @@ const BookLoans = () => {
     return date.toLocaleDateString('pt-BR');
   };
 
+  const handleCancelClick = (loanId: string) => {
+    setSelectedLoanId(loanId);
+    setIsDialogOpen(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (selectedLoanId) {
+      try {
+        await cancelLoan(selectedLoanId);
+        setIsDialogOpen(false);
+        setSelectedLoanId(null);
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível cancelar o empréstimo",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -126,15 +159,26 @@ const BookLoans = () => {
                   <TableCell>{formatDate(loan.returnDate)}</TableCell>
                   <TableCell>{getLoanStatus(loan.returnDate)}</TableCell>
                   <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/extend-loan/${loan.id}`)}
-                      className="flex items-center"
-                    >
-                      <Calendar size={14} className="mr-1" />
-                      Prorrogar
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/extend-loan/${loan.id}`)}
+                        className="flex items-center"
+                      >
+                        <Calendar size={14} className="mr-1" />
+                        Prorrogar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCancelClick(loan.id)}
+                        className="flex items-center text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                      >
+                        <BookX size={14} className="mr-1" />
+                        Cancelar
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -142,6 +186,33 @@ const BookLoans = () => {
           </Table>
         </div>
       )}
+
+      {/* diálogo de confirmação para cancelar empréstimo */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancelar Empréstimo</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja cancelar este empréstimo? 
+              Isto irá registrar a devolução do livro e disponibilizá-lo para novos empréstimos.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex space-x-2 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="default"
+              onClick={handleConfirmCancel}
+            >
+              Confirmar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
