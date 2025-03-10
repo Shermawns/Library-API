@@ -25,18 +25,16 @@ public class Aluguel {
     private Livro livro;
     @CreatedDate
     private LocalDate entryDate;
-    private LocalDate extendDate;
     private LocalDate exitDate;
 
     public Aluguel() {
     }
 
-    public Aluguel(Long id, Aluno aluno, Livro livro, LocalDate entryDate, LocalDate extendDate, LocalDate exitDate) {
+    public Aluguel(Long id, Aluno aluno, Livro livro, LocalDate entryDate, LocalDate exitDate) {
         this.id = id;
         this.aluno = aluno;
         this.livro = livro;
         this.entryDate = entryDate;
-        this.extendDate = extendDate;
         this.exitDate = exitDate;
     }
 
@@ -72,13 +70,6 @@ public class Aluguel {
         this.entryDate = entryDate;
     }
 
-    public LocalDate getExtendDate() {
-        return extendDate;
-    }
-
-    public void setExtendDate(LocalDate extendDate) {
-        this.extendDate = extendDate;
-    }
 
     public LocalDate getExitDate() {
         return exitDate;
