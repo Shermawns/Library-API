@@ -1,0 +1,26 @@
+package com.cmcb.biblioteca.enums;
+
+public enum Categoria{
+    ROMANCE,
+    FICCAO_CIENTIFICA,
+    MISTERIO,
+    HORROR,
+    BIOGRAFIA,
+    HISTORIA,
+    FILOSOFIA,
+    LITERATURA_INFANTIL,
+    GIBI,
+    TECNOLOGIA,
+    PORTUGUES,
+    LITERATURA,
+    INGLES,
+    BIOLOGIA,
+    QUIMICA,
+    FISICA,
+    CIENCIAS,
+    GEOGRAFIA,
+    SOCIOLOGIA,
+    MATEMATICA,
+    INFORMATICA,
+    OUTRO
+}

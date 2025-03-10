@@ -8,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LivroService {
@@ -29,8 +30,9 @@ public class LivroService {
     }
 
     public Livro save(Livro livro) {
-        if (livroRepository.findByCodigo(livro.getCodigo()).isPresent()) {
-            throw new DataIntegrityViolationException("O livro com código '" + livro.getCodigo() + "' já está registrado.");
+        Optional<Livro> existingLivro = livroRepository.findByISBN(livro.getISBN());
+        if (existingLivro.isPresent()) {
+            throw new DataIntegrityViolationException("O livro com ISBN '" + livro.getISBN() + "' já está registrado.");
         }
 
         livro.setStatus(Status.DISPONIVEL);
@@ -45,8 +47,8 @@ public class LivroService {
         if (livroRequest.getTitulo() != null) {
             livro.setTitulo(livroRequest.getTitulo());
         }
-        if (livroRequest.getCodigo() != null) {
-            livro.setCodigo(livroRequest.getCodigo());
+        if (livroRequest.getISBN() != null) {
+            livro.setISBN(livroRequest.getISBN());
         }
         if (livroRequest.getStatus() != null) {
             livro.setStatus(livroRequest.getStatus());

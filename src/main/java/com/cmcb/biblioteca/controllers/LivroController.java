@@ -1,4 +1,5 @@
 package com.cmcb.biblioteca.controllers;
+import com.cmcb.biblioteca.enums.Status;
 import com.cmcb.biblioteca.models.Livro;
 import com.cmcb.biblioteca.services.LivroService;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ public class LivroController {
     @PostMapping(value = "/create")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Livro> create(@RequestBody Livro livroRequest) {
+        livroRequest.setStatus(Status.DISPONIVEL);
         Livro livro = livroService.save(livroRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(livro);
     }
