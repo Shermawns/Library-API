@@ -1,0 +1,1 @@
+ALTER TABLE tb_users ADD COLUMN name VARCHAR(150);
