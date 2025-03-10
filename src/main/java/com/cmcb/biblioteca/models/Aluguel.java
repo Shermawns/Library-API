@@ -1,5 +1,7 @@
 package com.cmcb.biblioteca.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,6 +21,7 @@ public class Aluguel {
     private Aluno aluno;
     @ManyToOne
     @JoinColumn(name = "livro_id")
+    @JsonIgnoreProperties("alugueis")
     private Livro livro;
     @CreatedDate
     private LocalDate entryDate;

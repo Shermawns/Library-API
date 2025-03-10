@@ -2,6 +2,7 @@ package com.cmcb.biblioteca.models;
 
 import com.cmcb.biblioteca.enums.Status;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -19,7 +20,7 @@ public class Livro {
     @Enumerated(EnumType.STRING)
     private Status status;
     @OneToMany(mappedBy = "livro")
-    @JsonIgnore
+    @JsonManagedReference
     private Set<Aluguel> alugueis = new HashSet<>();
 
     public Livro() {

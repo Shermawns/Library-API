@@ -1,6 +1,7 @@
 package com.cmcb.biblioteca.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Fetch;
 import org.springframework.cglib.core.Local;
@@ -24,6 +25,7 @@ public class Aluno {
     private String nome;
     private String email;
     @OneToMany(mappedBy = "aluno")
+    @JsonIgnore
     private Set<Aluguel> alugueis = new HashSet<>();
     @CreatedDate
     private LocalDate data_criacao;
