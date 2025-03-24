@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBooks } from "../contexts/BookContext";
@@ -38,15 +37,23 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Biblioteca CMCB</h1>
-          <p className="text-muted-foreground">
-            Gerenciamento de livros e empréstimos
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight mb-2">Biblioteca CMCB</h1>
+        <p className="text-muted-foreground mb-6">
+          Gerenciamento de livros e empréstimos
+        </p>
+        
+        <div className="bg-gray-50 p-5 rounded-lg shadow-sm border">
+          <h2 className="text-lg font-medium mb-2">Pesquisar Livros</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Digite o título, autor ou ID do livro para encontrá-lo rapidamente
           </p>
+          <SearchBar 
+            onSearch={handleSearch} 
+            className="max-w-3xl"
+          />
         </div>
-        <SearchBar onSearch={handleSearch} />
       </div>
 
       <BookList 
