@@ -1,12 +1,17 @@
 package com.cmcb.biblioteca.services;
 
 import com.cmcb.biblioteca.enums.Status;
+import com.cmcb.biblioteca.models.Aluguel;
 import com.cmcb.biblioteca.models.Livro;
+import com.cmcb.biblioteca.repositories.AluguelRepository;
 import com.cmcb.biblioteca.repositories.LivroRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,9 +19,31 @@ import java.util.Optional;
 public class LivroService {
 
     private final LivroRepository livroRepository;
+    private final AluguelRepository aluguelRepository;
 
-    public LivroService(LivroRepository livroRepository) {
+    public LivroService(LivroRepository livroRepository, AluguelRepository aluguelRepository) {
         this.livroRepository = livroRepository;
+        this.aluguelRepository = aluguelRepository;
+    }
+
+    @Transactional
+    public void atualizarStatusAtrasados() {
+        List<Aluguel> alugueis = aluguelRepository.findAll();
+
+        for (Aluguel aluguel : alugueis) {
+            if (aluguel.getExitDate().isBefore(LocalDate.now()) &&
+                    aluguel.getLivro().getStatus() == Status.ALUGADO) {
+
+                Livro livro = aluguel.getLivro();
+                livro.setStatus(Status.ATRASADO);
+                livroRepository.save(livro);
+            }
+        }
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?") //atualizaTodoDiaMeiaNoite
+    public void atualizarStatusAtrasadosAutomaticamente() {
+        atualizarStatusAtrasados();
     }
 
     public List<Livro> findAll() {
@@ -63,4 +90,5 @@ public class LivroService {
 
         livroRepository.delete(livro);
     }
+
 }

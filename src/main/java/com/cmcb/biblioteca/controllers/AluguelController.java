@@ -54,5 +54,7 @@ public class AluguelController {
             List<Aluguel> alugueis = aluguelService.listarAlugueisPorLivro(livroId);
             return ResponseEntity.ok(alugueis);
     }
+
+
 }
 
