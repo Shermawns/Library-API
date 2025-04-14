@@ -74,4 +74,19 @@ public class AluguelService {
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
         return aluguelRepository.findByLivro(livro);
     }
+
+    public List<Aluguel> listarAlugueisAlugados() {
+        return aluguelRepository.findAll()
+                .stream()
+                .filter(aluguel -> aluguel.getLivro().getStatus() == Status.ALUGADO)
+                .toList();
+    }
+
+    public List<Aluguel> listarAlugueisAtrasados() {
+        return aluguelRepository.findAll()
+                .stream()
+                .filter(aluguel -> aluguel.getLivro().getStatus() == Status.ATRASADO)
+                .toList();
+    }
+
 }

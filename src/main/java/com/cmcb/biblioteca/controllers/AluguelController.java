@@ -55,6 +55,20 @@ public class AluguelController {
             return ResponseEntity.ok(alugueis);
     }
 
+    @GetMapping("/filtrar/alugados")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Aluguel>> listarAlugueisAlugados() {
+        List<Aluguel> alugueis = aluguelService.listarAlugueisAlugados();
+        return ResponseEntity.ok(alugueis);
+    }
+
+    @GetMapping("/filtrar/atrasados")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Aluguel>> listarAlugueisAtrasados() {
+        List<Aluguel> alugueis = aluguelService.listarAlugueisAtrasados();
+        return ResponseEntity.ok(alugueis);
+    }
+
 
 }
 
