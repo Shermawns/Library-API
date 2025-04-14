@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     Aluno findByMatricula(String matricula);
+
+    Aluno findByEmail(String email);
 }

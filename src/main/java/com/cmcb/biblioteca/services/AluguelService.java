@@ -18,11 +18,13 @@ public class AluguelService {
     private final AluguelRepository aluguelRepository;
     private final LivroRepository livroRepository;
     private final AlunoRepository alunoRepository;
+    private final EmailService emailService;
 
-    public AluguelService(AluguelRepository aluguelRepository, LivroRepository livroRepository, AlunoRepository alunoRepository) {
+    public AluguelService(AluguelRepository aluguelRepository, LivroRepository livroRepository, AlunoRepository alunoRepository, EmailService emailService) {
         this.aluguelRepository = aluguelRepository;
         this.livroRepository = livroRepository;
         this.alunoRepository = alunoRepository;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -33,13 +35,11 @@ public class AluguelService {
         Livro livro = livroRepository.findById(livroID)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
 
-
         if (!livro.getStatus().equals(Status.DISPONIVEL)) {
             throw new RuntimeException("O livro não está disponível para aluguel");
         }
 
         Aluguel aluguel = new Aluguel();
-
         livro.setStatus(Status.ALUGADO);
         livroRepository.save(livro);
 
@@ -48,8 +48,23 @@ public class AluguelService {
         aluguel.setEntryDate(LocalDate.now());
         aluguel.setExitDate(dataDevolucao);
 
-        return aluguelRepository.save(aluguel);
+        Aluguel aluguelSalvo = aluguelRepository.save(aluguel);
 
+        String destinatario = aluno.getEmail();
+        String assunto = "📚 Confirmação de Aluguel de Livro";
+
+        String mensagem = "Olá " + aluno.getNome() + " 👋\n\n" +
+                "Você acabou de alugar o livro " + livro.getTitulo() + "📘.\n" +
+                "Data prevista para devolução: " + dataDevolucao + "\n\n" +
+                "⚠️ *Atenção: o formato da data segue o padrão americano **MM/dd/yyyy** (mês/dia/ano).\n" +
+                "Por exemplo, 04/15/2025 significa 15 de abril de 2025.\n\n" +
+                "Por favor, devolva o livro dentro do prazo para que outros alunos também possam aproveitá-lo. 🙏\n\n" +
+                "Caso tenha dúvidas, estamos à disposição! 💬\n\n" +
+                "Atenciosamente,\n📚 Equipe da Biblioteca Municipal ✨";
+
+        emailService.enviarEmail(destinatario, assunto, mensagem);
+
+        return aluguelSalvo;
     }
     @Transactional
     public void devolverLivro(Long aluguelID){

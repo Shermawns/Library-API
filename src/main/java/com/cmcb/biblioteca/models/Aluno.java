@@ -3,6 +3,7 @@ package com.cmcb.biblioteca.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import org.hibernate.annotations.Fetch;
 import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,6 +24,7 @@ public class Aluno {
     private Long id;
     private String matricula;
     private String nome;
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@cm\\.cb\\.ce\\.gov\\.br$", message = "O e-mail deve ser do domínio @cm.cb.ce.gov.br")
     private String email;
     @OneToMany(mappedBy = "aluno")
     @JsonIgnore

@@ -33,6 +33,9 @@ public class AlunoService {
         if (alunoRepository.findByMatricula(aluno.getMatricula()) != null) {
             throw new DataIntegrityViolationException("O aluno '" + aluno.getMatricula() + "' já está registrado.");
         }
+        if (alunoRepository.findByEmail(aluno.getEmail()) != null){
+            throw new DataIntegrityViolationException("O email '" + aluno.getEmail() + "' já está em uso por outro aluno.");
+        }
         return alunoRepository.save(aluno);
     }
 
