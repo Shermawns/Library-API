@@ -13,16 +13,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 215 100% 50%;
+    --primary: 142 71% 31%; 
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 25 95% 53%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    --accent: 172 70% 37%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -30,7 +30,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 142 71% 31%;
 
     --radius: 0.5rem;
   }
@@ -45,16 +45,16 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 142 71% 31%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 25 95% 53%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 172 70% 37%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -62,7 +62,7 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 142 71% 31%;
   }
 }
 
@@ -88,7 +88,7 @@
 }
 
 .auth-container {
-  background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-image: linear-gradient(135deg, #29a745 0%, #23d160 100%);
 }
 
 .glass {
@@ -104,18 +104,14 @@
 }
 
 /* elementos form  */
-input,
-select,
-textarea {
+input, select, textarea {
   transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: hsl(var(--primary));
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 0 0 2px rgba(41, 167, 69, 0.25);
 }
 
 button {
@@ -135,4 +131,54 @@ button:active {
 .borrowed-badge {
   background-color: rgba(245, 158, 11, 0.1);
   color: rgb(245, 158, 11);
+}
+
+
+.cmcb-header-gradient {
+  background: linear-gradient(90deg, #29a745 0%, #23d160 50%, #20c997 100%);
+}
+
+
+.cmcb-footer-gradient {
+  background: linear-gradient(90deg, #ff7e1d 0%, #fd7e14 100%);
+  height: 8px;
+}
+
+
+.cmcb-button-green {
+  background-color: #29a745;
+  color: white;
+  border-radius: 0.25rem;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.cmcb-button-green:hover {
+  background-color: #218838;
+}
+
+
+.cmcb-nav-link {
+  color: #212529;
+  position: relative;
+  padding-bottom: 0.25rem;
+}
+
+.cmcb-nav-link:after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #29a745;
+  transition: width 0.3s ease;
+}
+
+.cmcb-nav-link:hover:after {
+  width: 100%;
+}
+
+.cmcb-nav-link.active:after {
+  width: 100%;
 }

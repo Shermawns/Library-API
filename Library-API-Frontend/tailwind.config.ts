@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -69,6 +68,13 @@ export default {
         libraryRed: '#ef4444',
         libraryBlue: '#3b82f6',
         libraryGray: '#f3f4f6',
+        // CMCB cores
+        cmcbGreen: '#29a745',
+        cmcbDarkGreen: '#218838',
+        cmcbLightGreen: '#23d160',
+        cmcbTeal: '#20c997',
+        cmcbOrange: '#fd7e14',
+        cmcbYellow: '#ffc107',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

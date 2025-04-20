@@ -36,13 +36,13 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+      <header className="bg-cmcbGreen text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="md:hidden p-2 rounded-md text-gray-500 hover:text-gray-900 focus:outline-none"
+                className="md:hidden p-2 rounded-md text-white hover:bg-cmcbDarkGreen focus:outline-none"
               >
                 {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
@@ -52,7 +52,7 @@ const Layout = ({ children }: LayoutProps) => {
                   src="https://www.cm.cb.ce.gov.br/wp-content/uploads/sites/62/2018/11/logo-CMCB.png"
                   alt="Logo Biblioteca CMCB"
                 />
-                <span className="ml-2 text-xl font-semibold text-gray-900">
+                <span className="ml-2 text-xl font-semibold text-white">
                   Biblioteca CMCB
                 </span>
               </div>
@@ -60,14 +60,14 @@ const Layout = ({ children }: LayoutProps) => {
 
             <div className="flex items-center">
               <div className="hidden md:flex md:items-center md:ml-6">
-                <span className="text-sm font-medium text-gray-700 mr-4">
+                <span className="text-sm font-medium text-white mr-4">
                   Olá, {user?.name}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="flex items-center"
+                  className="flex items-center bg-white text-cmcbGreen hover:bg-gray-100 hover:text-cmcbDarkGreen"
                 >
                   <LogOut size={16} className="mr-2" />
                   Sair
@@ -92,7 +92,7 @@ const Layout = ({ children }: LayoutProps) => {
                     src="https://www.cm.cb.ce.gov.br/wp-content/uploads/sites/62/2018/11/logo-CMCB.png"
                     alt="Logo Biblioteca CMCB"
                   />
-                  <span className="ml-2 text-xl font-semibold text-gray-900">
+                  <span className="ml-2 text-xl font-semibold text-cmcbGreen">
                     Biblioteca CMCB
                   </span>
                 </div>
@@ -103,8 +103,8 @@ const Layout = ({ children }: LayoutProps) => {
                       to={item.path}
                       className={`${
                         location.pathname === item.path
-                          ? "bg-primary text-white"
-                          : "text-gray-600 hover:bg-gray-100"
+                          ? "bg-cmcbGreen text-white"
+                          : "text-gray-600 hover:bg-gray-100 hover:text-cmcbGreen"
                       } group flex items-center px-2 py-2 text-base font-medium rounded-md transition-colors duration-150`}
                       onClick={() => setSidebarOpen(false)}
                     >
@@ -115,11 +115,13 @@ const Layout = ({ children }: LayoutProps) => {
                 </nav>
               </div>
               <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-                <Button onClick={handleLogout} variant="ghost" className="flex items-center w-full">
+                <Button onClick={handleLogout} variant="ghost" className="flex items-center w-full text-cmcbGreen hover:text-cmcbDarkGreen">
                   <LogOut size={16} className="mr-2" />
                   Sair
                 </Button>
               </div>
+              {/* footer gradient*/}
+              <div className="cmcb-footer-gradient w-full"></div>
             </div>
           </div>
         )}
@@ -136,8 +138,8 @@ const Layout = ({ children }: LayoutProps) => {
                       to={item.path}
                       className={`${
                         location.pathname === item.path
-                          ? "bg-primary text-white"
-                          : "text-gray-600 hover:bg-gray-100"
+                          ? "bg-cmcbGreen text-white"
+                          : "text-gray-600 hover:bg-gray-100 hover:text-cmcbGreen"
                       } group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150`}
                     >
                       <span className="mr-3">{item.icon}</span>
@@ -160,6 +162,7 @@ const Layout = ({ children }: LayoutProps) => {
                   </div>
                 </div>
               </div>
+              <div className="cmcb-footer-gradient w-full"></div>
             </div>
           </div>
         </div>
@@ -171,6 +174,7 @@ const Layout = ({ children }: LayoutProps) => {
               {children}
             </div>
           </main>
+          <div className="cmcb-footer-gradient w-full"></div>
         </div>
       </div>
     </div>
