@@ -36,7 +36,7 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* header */}
-      <header className="bg-cmcbGreen text-white shadow-md">
+      <header className="cmcb-header-gradient text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
