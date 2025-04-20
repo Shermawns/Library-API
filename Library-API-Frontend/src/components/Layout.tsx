@@ -1,4 +1,3 @@
-
 import { useState, ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -36,7 +35,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header */}
+      {/* header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
@@ -49,9 +48,9 @@ const Layout = ({ children }: LayoutProps) => {
               </button>
               <div className="flex-shrink-0 flex items-center">
                 <img
-                  className="h-8 w-auto"
-                  src="https://cdn-icons-png.flaticon.com/512/3330/3330314.png"
-                  alt="Logo Biblioteca"
+                  className="h-12 w-auto"
+                  src="https://www.cm.cb.ce.gov.br/wp-content/uploads/sites/62/2018/11/logo-CMCB.png"
+                  alt="Logo Biblioteca CMCB"
                 />
                 <span className="ml-2 text-xl font-semibold text-gray-900">
                   Biblioteca CMCB
@@ -80,7 +79,7 @@ const Layout = ({ children }: LayoutProps) => {
       </header>
 
       <div className="flex flex-1">
-        {/* Sidebar for mobile */}
+        {/* sidebar pro mobile */}
         {sidebarOpen && (
           <div className="fixed inset-0 flex z-40 md:hidden">
             <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)}></div>
@@ -89,9 +88,9 @@ const Layout = ({ children }: LayoutProps) => {
               <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                 <div className="flex-shrink-0 flex items-center px-4">
                   <img
-                    className="h-8 w-auto"
-                    src="https://cdn-icons-png.flaticon.com/512/3330/3330314.png"
-                    alt="Logo Biblioteca"
+                    className="h-12 w-auto"
+                    src="https://www.cm.cb.ce.gov.br/wp-content/uploads/sites/62/2018/11/logo-CMCB.png"
+                    alt="Logo Biblioteca CMCB"
                   />
                   <span className="ml-2 text-xl font-semibold text-gray-900">
                     Biblioteca CMCB
@@ -125,7 +124,7 @@ const Layout = ({ children }: LayoutProps) => {
           </div>
         )}
 
-        {/* Sidebar for desktop */}
+        {/* sidebar pra desktop */}
         <div className="hidden md:flex md:flex-shrink-0">
           <div className="flex flex-col w-64">
             <div className="flex flex-col h-0 flex-1 border-r border-gray-200 bg-white">
@@ -165,7 +164,7 @@ const Layout = ({ children }: LayoutProps) => {
           </div>
         </div>
 
-        {/* Main content */}
+        {/* conteudo principal */}
         <div className="flex flex-col w-0 flex-1 overflow-hidden bg-gray-50">
           <main className="flex-1 relative z-0 overflow-y-auto focus:outline-none py-6 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto animate-fade-in">
