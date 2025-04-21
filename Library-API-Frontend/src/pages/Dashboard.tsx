@@ -13,23 +13,39 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { BookOpen, BookCheck, Library } from "lucide-react";
+import { BookOpen, BookCheck, Library, Clock } from "lucide-react";
 
 const Dashboard = () => {
-  const { books, searchBooks, deleteBook, createLoan } = useBooks();
+  const { books, searchBooks, deleteBook, createLoan, loans } = useBooks();
   const navigate = useNavigate();
-  const [filteredBooks, setFilteredBooks] = useState(books);
+  const [filteredBooks, setFilteredBooks] = useState<Book[]>(books);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [filterValue, setFilterValue] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const isBookOverdue = (bookId: string) => {
+    const currentDate = new Date();
+    const loan = loans.find(loan => loan.bookId === bookId);
+    if (!loan) return false;
+    
+    return new Date(loan.returnDate) < currentDate;
+  };
+
   const applyFilters = (query: string, filter: string) => {
     let result = searchBooks(query);
     
-    if (filter === "available") {
-      result = result.filter(book => book.available);
-    } else if (filter === "borrowed") {
-      result = result.filter(book => !book.available);
+    switch (filter) {
+      case "available":
+        result = result.filter(book => book.available);
+        break;
+      case "borrowed":
+        result = result.filter(book => !book.available);
+        break;
+      case "overdue":
+        result = result.filter(book => !book.available && isBookOverdue(book.id));
+        break;
+      default:
+        break;
     }
     
     setFilteredBooks(result);
@@ -93,6 +109,10 @@ const Dashboard = () => {
                 <ToggleGroupItem value="borrowed" aria-label="Livros emprestados">
                   <BookOpen className="h-4 w-4 mr-2" />
                   Emprestados
+                </ToggleGroupItem>
+                <ToggleGroupItem value="overdue" aria-label="Livros atrasados">
+                  <Clock className="h-4 w-4 mr-2" />
+                  Atrasados
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
