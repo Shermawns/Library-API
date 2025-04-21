@@ -79,11 +79,6 @@ const Dashboard = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight mb-2">Biblioteca CMCB</h1>
-        <p className="text-muted-foreground mb-6">
-          Gerenciamento de livros e empréstimos
-        </p>
-        
         <div className="bg-gray-50 p-5 rounded-lg shadow-sm border">
           <h2 className="text-lg font-medium mb-2">Pesquisar Livros</h2>
           <p className="text-sm text-muted-foreground mb-4">

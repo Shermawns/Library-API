@@ -109,13 +109,6 @@ const BookLoans = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Empréstimos de Livros</h1>
-        <p className="text-muted-foreground mt-1">
-          Gerencie os empréstimos de livros da biblioteca
-        </p>
-      </div>
-      
       <div className="flex items-center mb-6">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
