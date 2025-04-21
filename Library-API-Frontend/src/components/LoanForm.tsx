@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +35,12 @@ export interface LoanFormData {
 }
 
 const grades = [
+  "Infantil",
+  "1º Ano - Ensino Fundamental",
+  "2º Ano - Ensino Fundamental",
+  "3º Ano - Ensino Fundamental",
+  "4º Ano - Ensino Fundamental",
+  "5º Ano - Ensino Fundamental",
   "6º Ano - Ensino Fundamental",
   "7º Ano - Ensino Fundamental",
   "8º Ano - Ensino Fundamental",
@@ -48,11 +53,8 @@ const grades = [
   "Outro",
 ];
 
-// Calculate minimum tomorrow and maximum 30 days from now
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
-const maxDate = new Date();
-maxDate.setDate(maxDate.getDate() + 30);
 
 const formatDateForInput = (date: Date) => {
   return date.toISOString().split('T')[0];
@@ -65,7 +67,7 @@ const LoanForm = ({ book, onSubmit, onCancel }: LoanFormProps) => {
     studentName: "",
     studentId: "",
     studentGrade: "",
-    returnDate: formatDateForInput(new Date(tomorrow.getTime() + 14 * 24 * 60 * 60 * 1000)), // Default to 14 days from tomorrow
+    returnDate: formatDateForInput(new Date(tomorrow.getTime() + 14 * 24 * 60 * 60 * 1000)),
   });
   const [loading, setLoading] = useState(false);
 
@@ -151,7 +153,6 @@ const LoanForm = ({ book, onSubmit, onCancel }: LoanFormProps) => {
               type="date"
               required
               min={formatDateForInput(tomorrow)}
-              max={formatDateForInput(maxDate)}
               value={formData.returnDate}
               onChange={handleChange}
             />

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useBooks } from "../contexts/BookContext";
@@ -24,11 +23,9 @@ const ExtendLoan = () => {
     loans.find((loan) => loan.id === id)
   );
 
-  // calcular mínimo amanhã e máximo daqui a 30 dias
+  //calcular mí­nimo amanhã e máximo daqui a 30 dias
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const maxDate = new Date();
-  maxDate.setDate(maxDate.getDate() + 30);
 
   const formatDateForInput = (date: Date) => {
     return date.toISOString().split('T')[0];
@@ -45,13 +42,8 @@ const ExtendLoan = () => {
     const newReturnDate = new Date(currentReturnDate);
     newReturnDate.setDate(newReturnDate.getDate() + 7);
     
-    // garante que não é mais de 30 dias a partir de agora
-    if (newReturnDate > maxDate) {
-      newReturnDate.setTime(maxDate.getTime());
-    }
-    
     setReturnDate(formatDateForInput(newReturnDate));
-  }, [currentLoan, maxDate, navigate]);
+  }, [currentLoan, navigate]);
 
   if (!currentLoan) return null;
 
@@ -125,7 +117,6 @@ const ExtendLoan = () => {
                 type="date"
                 required
                 min={formatDateForInput(tomorrow)}
-                max={formatDateForInput(maxDate)}
                 value={returnDate}
                 onChange={(e) => setReturnDate(e.target.value)}
               />
