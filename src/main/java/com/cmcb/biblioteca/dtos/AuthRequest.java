@@ -18,7 +18,5 @@ public record AuthRequest (
         @NotBlank(message = "Confirm password cannot be blank")
         @Size(min = 6)
         String confirmPassword,
-
-        Role role,
         String registrationCode) {
 }

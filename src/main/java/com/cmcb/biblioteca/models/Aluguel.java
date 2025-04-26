@@ -23,6 +23,7 @@ public class Aluguel {
     @JoinColumn(name = "livro_id")
     @JsonIgnoreProperties("alugueis")
     private Livro livro;
+    private boolean devolvido = false;
     @CreatedDate
     private LocalDate entryDate;
     private LocalDate exitDate;
@@ -30,10 +31,11 @@ public class Aluguel {
     public Aluguel() {
     }
 
-    public Aluguel(Long id, Aluno aluno, Livro livro, LocalDate entryDate, LocalDate exitDate) {
+    public Aluguel(Long id, Aluno aluno, Livro livro, boolean devolvido, LocalDate entryDate, LocalDate exitDate) {
         this.id = id;
         this.aluno = aluno;
         this.livro = livro;
+        this.devolvido = devolvido;
         this.entryDate = entryDate;
         this.exitDate = exitDate;
     }
@@ -77,5 +79,13 @@ public class Aluguel {
 
     public void setExitDate(LocalDate exitDate) {
         this.exitDate = exitDate;
+    }
+
+    public boolean isDevolvido() {
+        return devolvido;
+    }
+
+    public void setDevolvido(boolean devolvido) {
+        this.devolvido = devolvido;
     }
 }

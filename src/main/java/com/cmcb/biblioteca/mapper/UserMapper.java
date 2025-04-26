@@ -11,16 +11,14 @@ public class UserMapper {
     public User toUserRequest(AuthRequest userRequest){
         return new User(
                 userRequest.username(),
-                userRequest.password(),
-                userRequest.role()
+                userRequest.password()
         );
     }
 
     public AuthResponse toUserResponse(User user){
         return new AuthResponse(
                 user.getId(),
-                user.getUsername(),
-                user.getRole()
+                user.getUsername()
         );
     }
 }

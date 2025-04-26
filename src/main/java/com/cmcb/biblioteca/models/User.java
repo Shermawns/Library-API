@@ -30,13 +30,12 @@ public class User implements UserDetails {
         this.name = name;
         this.username = username;
         this.password = password;
-        this.role = role;
+        this.role = Role.ROLE_ADMIN;
     }
 
-    public User(String username, String encryptedPassword, Role role) {
+    public User(String username, String encryptedPassword) {
         this.username = username;
         this.password = encryptedPassword;
-        this.role = role;
     }
 
     @Override
