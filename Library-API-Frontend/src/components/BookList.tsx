@@ -1,9 +1,8 @@
-
 import { Book } from "../contexts/BookContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertCircle, Trash2 } from "lucide-react";
+import { CheckCircle, AlertCircle, Trash2, Clock } from "lucide-react";
 import { 
   Dialog,
   DialogContent,
@@ -14,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { useBooks } from "../contexts/BookContext";
 
 interface BookListProps {
   books: Book[];
@@ -24,6 +24,7 @@ interface BookListProps {
 const BookList = ({ books, onDelete, onLoan }: BookListProps) => {
   const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const { loans } = useBooks();
 
   const confirmDelete = async () => {
     if (!bookToDelete) return;
@@ -37,6 +38,13 @@ const BookList = ({ books, onDelete, onLoan }: BookListProps) => {
     }
   };
 
+  const isBookOverdue = (bookId: string) => {
+    const currentDate = new Date();
+    return loans.some(loan => 
+      loan.bookId === bookId && new Date(loan.returnDate) < currentDate
+    );
+  };
+
   if (books.length === 0) {
     return (
       <div className="text-center py-10">
@@ -47,23 +55,35 @@ const BookList = ({ books, onDelete, onLoan }: BookListProps) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {books.map((book) => (
+      {books.map((book) => {
+        const isOverdue = isBookOverdue(book.id);
+        const isAvailable = book.availableQuantity > 0;
+        return (
         <Card key={book.id} className="book-card overflow-hidden h-full flex flex-col">
           <CardHeader className="pb-4">
             <div className="flex justify-between items-start">
-              <Badge className={book.available ? "available-badge" : "borrowed-badge"}>
-                {book.available ? (
+              {isAvailable ? (
+                <Badge className="bg-green-100 text-green-600 border-green-200">
                   <div className="flex items-center">
                     <CheckCircle size={14} className="mr-1" />
-                    Disponível
+                    {book.availableQuantity} disponível{book.availableQuantity !== 1 ? 's' : ''}
                   </div>
-                ) : (
+                </Badge>
+              ) : isOverdue ? (
+                <Badge className="bg-red-100 text-red-600 border-red-200">
+                  <div className="flex items-center">
+                    <Clock size={14} className="mr-1" />
+                    Atrasado
+                  </div>
+                </Badge>
+              ) : (
+                <Badge className="bg-amber-100 text-amber-600 border-amber-200">
                   <div className="flex items-center">
                     <AlertCircle size={14} className="mr-1" />
-                    Emprestado
+                    Indisponível
                   </div>
-                )}
-              </Badge>
+                </Badge>
+              )}
               <div className="text-xs text-gray-500">ID: {book.id}</div>
             </div>
             <CardTitle className="mt-2 text-xl">{book.title}</CardTitle>
@@ -90,17 +110,18 @@ const BookList = ({ books, onDelete, onLoan }: BookListProps) => {
               </Button>
               <Button 
                 size="sm" 
-                disabled={!book.available}
-                onClick={() => onLoan(book)}
+                disabled={!isAvailable}
+                onClick={() => isAvailable ? onLoan(book) : null}
+                className={!isAvailable ? "opacity-50 cursor-not-allowed" : ""}
               >
-                {book.available ? "Emprestar" : "Indisponível"}
+                {isAvailable ? "Emprestar" : "Indisponível"}
               </Button>
             </div>
           </CardFooter>
         </Card>
-      ))}
+      )})}
 
-      {/* Delete confirmation dialog */}
+      {/* diálogo de confirmação de exclusão */}
       <Dialog open={!!bookToDelete} onOpenChange={() => setBookToDelete(null)}>
         <DialogContent>
           <DialogHeader>

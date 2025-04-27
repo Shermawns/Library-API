@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +29,7 @@ export interface BookFormData {
   year: number;
   isbn: string;
   category: string;
+  totalQuantity: number;
 }
 
 const categories = [
@@ -61,6 +61,7 @@ const BookForm = ({ onSubmit }: BookFormProps) => {
     year: currentYear,
     isbn: "",
     category: "",
+    totalQuantity: 1
   });
   const [loading, setLoading] = useState(false);
 
@@ -82,7 +83,6 @@ const BookForm = ({ onSubmit }: BookFormProps) => {
     
     try {
       await onSubmit(formData);
-      // Reset form after successful submission
       setFormData({
         title: "",
         author: "",
@@ -90,6 +90,7 @@ const BookForm = ({ onSubmit }: BookFormProps) => {
         year: currentYear,
         isbn: "",
         category: "",
+        totalQuantity: 1
       });
     } finally {
       setLoading(false);
@@ -189,6 +190,20 @@ const BookForm = ({ onSubmit }: BookFormProps) => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="totalQuantity">Quantidade</Label>
+            <Input
+              id="totalQuantity"
+              name="totalQuantity"
+              type="number"
+              min="1"
+              placeholder="Quantidade de exemplares"
+              required
+              value={formData.totalQuantity}
+              onChange={handleChange}
+            />
           </div>
         </CardContent>
 

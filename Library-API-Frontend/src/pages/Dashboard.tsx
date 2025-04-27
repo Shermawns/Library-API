@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBooks } from "../contexts/BookContext";
 import BookList from "../components/BookList";
@@ -22,27 +22,36 @@ const Dashboard = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [filterValue, setFilterValue] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
+
+  useEffect(() => {
+    applyFilters(searchQuery, filterValue);
+  }, [books, loans, showOnlyAvailable]);
 
   const isBookOverdue = (bookId: string) => {
     const currentDate = new Date();
-    const loan = loans.find(loan => loan.bookId === bookId);
-    if (!loan) return false;
-    
-    return new Date(loan.returnDate) < currentDate;
+    // encontrar todos os empréstimos deste livro
+    const bookLoans = loans.filter(loan => loan.bookId === bookId);
+    // verificar se algum deles está atrasado
+    return bookLoans.some(loan => new Date(loan.returnDate) < currentDate);
   };
 
   const applyFilters = (query: string, filter: string) => {
-    let result = searchBooks(query);
+    let result = searchBooks(query, showOnlyAvailable);
     
     switch (filter) {
       case "available":
-        result = result.filter(book => book.available);
+        result = result.filter(book => book.availableQuantity > 0);
         break;
       case "borrowed":
-        result = result.filter(book => !book.available);
+        result = result.filter(book => book.availableQuantity < book.totalQuantity);
         break;
       case "overdue":
-        result = result.filter(book => !book.available && isBookOverdue(book.id));
+        // filtro de atrasados corrigido - não verifica mais se disponível < total, o que era redundante
+        result = result.filter(book => {
+          // um livro está atrasado se pelo menos um de seus empréstimos estiver com data de devolução vencida
+          return isBookOverdue(book.id);
+        });
         break;
       default:
         break;
@@ -68,7 +77,10 @@ const Dashboard = () => {
   };
 
   const handleLoanClick = (book: Book) => {
-    setSelectedBook(book);
+    // só define o livro selecionado se ele estiver disponível
+    if (book.availableQuantity > 0) {
+      setSelectedBook(book);
+    }
   };
 
   const handleLoanSubmit = async (loanData: LoanFormData) => {
@@ -121,7 +133,6 @@ const Dashboard = () => {
         onLoan={handleLoanClick}
       />
 
-      {/* emprestimo dialog */}
       <Dialog open={!!selectedBook} onOpenChange={() => setSelectedBook(null)}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -130,7 +141,7 @@ const Dashboard = () => {
               Preencha as informações abaixo para registrar o empréstimo.
             </DialogDescription>
           </DialogHeader>
-          {selectedBook && (
+          {selectedBook && selectedBook.availableQuantity > 0 && (
             <LoanForm
               book={selectedBook}
               onSubmit={handleLoanSubmit}

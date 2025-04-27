@@ -1,8 +1,7 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-// types
+// tipos
 export interface Book {
   id: string;
   title: string;
@@ -12,6 +11,8 @@ export interface Book {
   isbn: string;
   category: string;
   available: boolean;
+  totalQuantity: number;
+  availableQuantity: number;
 }
 
 export interface Loan {
@@ -29,9 +30,9 @@ interface BookContextType {
   books: Book[];
   loans: Loan[];
   loading: boolean;
-  addBook: (book: Omit<Book, "id" | "available">) => Promise<void>;
+  addBook: (book: Omit<Book, "id" | "available" | "availableQuantity">) => Promise<void>;
   deleteBook: (id: string) => Promise<void>;
-  searchBooks: (query: string) => Book[];
+  searchBooks: (query: string, onlyAvailable?: boolean) => Book[];
   createLoan: (loan: Omit<Loan, "id" | "loanDate">) => Promise<void>;
   extendLoan: (loanId: string, newReturnDate: string) => Promise<void>;
   getBookById: (id: string) => Book | undefined;
@@ -42,7 +43,7 @@ interface BookContextType {
 
 const BookContext = createContext<BookContextType | undefined>(undefined);
 
-// data exemplo pra demo
+// atualiza livros iniciais com quantidade
 const initialBooks: Book[] = [
   {
     id: "1",
@@ -52,7 +53,9 @@ const initialBooks: Book[] = [
     year: 1899,
     isbn: "9788573261240",
     category: "Literatura Brasileira",
-    available: true
+    available: true,
+    totalQuantity: 3,
+    availableQuantity: 3
   },
   {
     id: "2",
@@ -62,7 +65,9 @@ const initialBooks: Book[] = [
     year: 1943,
     isbn: "9788574801612",
     category: "Literatura Estrangeira",
-    available: false
+    available: false,
+    totalQuantity: 2,
+    availableQuantity: 2
   },
   {
     id: "3",
@@ -72,7 +77,9 @@ const initialBooks: Book[] = [
     year: 1881,
     isbn: "9788535911145",
     category: "Literatura Brasileira",
-    available: true
+    available: true,
+    totalQuantity: 4,
+    availableQuantity: 4
   },
   {
     id: "4",
@@ -82,7 +89,9 @@ const initialBooks: Book[] = [
     year: 1938,
     isbn: "9788501041845",
     category: "Literatura Brasileira",
-    available: true
+    available: true,
+    totalQuantity: 5,
+    availableQuantity: 5
   },
   {
     id: "5",
@@ -92,7 +101,9 @@ const initialBooks: Book[] = [
     year: 1937,
     isbn: "9788535911442",
     category: "Literatura Brasileira",
-    available: false
+    available: false,
+    totalQuantity: 1,
+    availableQuantity: 1
   }
 ];
 
@@ -125,7 +136,7 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // inicializar com o localStorage ou usar data teste
+  // inicializa a partir do localStorage ou usa dados mockados
   useEffect(() => {
     const storedBooks = localStorage.getItem("library_books");
     const storedLoans = localStorage.getItem("library_loans");
@@ -135,7 +146,7 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   }, []);
 
-  // atualizar localStorage quando livro ou emprestimo muda
+  // atualiza o localStorage quando livros ou empréstimos mudam
   useEffect(() => {
     if (books.length > 0) {
       localStorage.setItem("library_books", JSON.stringify(books));
@@ -148,16 +159,16 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [loans]);
 
-  // operacoes com livro
-  const addBook = async (bookData: Omit<Book, "id" | "available">) => {
+  // operações de livro
+  const addBook = async (bookData: Omit<Book, "id" | "available" | "availableQuantity">) => {
     try {
       setLoading(true);
       
-      
       const newBook: Book = {
         ...bookData,
-        id: Date.now().toString(), // gerar um id (mudar na integração com back)
-        available: true // novos livros ficam disponiveis por padrao
+        id: Date.now().toString(),
+        available: bookData.totalQuantity > 0,
+        availableQuantity: bookData.totalQuantity
       };
       
       setBooks(prevBooks => [...prevBooks, newBook]);
@@ -182,12 +193,14 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       
-      // checar se livro esta em emprestimo
+      // verifica se o livro está emprestado
       const isOnLoan = loans.some(loan => loan.bookId === id);
       if (isOnLoan) {
         throw new Error("Não é possível excluir um livro que está emprestado");
       }
       
+      // em um app real, seria uma chamada de API
+      // await api.delete(`/books/${id}`);
       
       const bookToDelete = books.find(book => book.id === id);
       
@@ -211,54 +224,69 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const searchBooks = (query: string) => {
-    if (!query.trim()) return books;
+  const searchBooks = (query: string, onlyAvailable: boolean = false) => {
+    if (!query.trim() && !onlyAvailable) return books;
     
-    const lowerCaseQuery = query.toLowerCase();
-    return books.filter(book => 
-      book.title.toLowerCase().includes(lowerCaseQuery) || 
-      book.id.includes(lowerCaseQuery) ||
-      book.author.toLowerCase().includes(lowerCaseQuery) ||
-      book.isbn.includes(lowerCaseQuery)
-    );
+    let filteredBooks = books;
+    
+    if (onlyAvailable) {
+      filteredBooks = filteredBooks.filter(book => book.availableQuantity > 0);
+    }
+    
+    if (query.trim()) {
+      const lowerCaseQuery = query.toLowerCase();
+      filteredBooks = filteredBooks.filter(book => 
+        book.title.toLowerCase().includes(lowerCaseQuery) || 
+        book.id.includes(lowerCaseQuery) ||
+        book.author.toLowerCase().includes(lowerCaseQuery) ||
+        book.isbn.includes(lowerCaseQuery)
+      );
+    }
+    
+    return filteredBooks;
   };
 
   const getBookById = (id: string) => {
     return books.find(book => book.id === id);
   };
 
-  // operacoes com emprestimo
+  // operações de empréstimo
   const createLoan = async (loanData: Omit<Loan, "id" | "loanDate">) => {
     try {
       setLoading(true);
       
-      // pegar o livro
       const book = books.find(b => b.id === loanData.bookId);
       if (!book) {
         throw new Error("Livro não encontrado");
       }
       
-      if (!book.available) {
+      if (book.availableQuantity <= 0) {
         throw new Error("Este livro não está disponível para empréstimo");
       }
-      
       
       const today = new Date().toISOString().split('T')[0];
       
       const newLoan: Loan = {
         ...loanData,
-        id: Date.now().toString(), // Gerar o ID (mudar com back)
+        id: Date.now().toString(),
         loanDate: today
       };
       
-      // atualizar disponibilidade do livro
+      // atualiza a disponibilidade e quantidade do livro
       setBooks(prevBooks => 
-        prevBooks.map(b => 
-          b.id === loanData.bookId ? { ...b, available: false } : b
-        )
+        prevBooks.map(b => {
+          if (b.id === loanData.bookId) {
+            const newQuantity = b.availableQuantity - 1;
+            return {
+              ...b,
+              available: newQuantity > 0,
+              availableQuantity: newQuantity
+            };
+          }
+          return b;
+        })
       );
       
-      // adicionar ao emprestimo
       setLoans(prevLoans => [...prevLoans, newLoan]);
       
       toast({
@@ -281,7 +309,10 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       
-      // atualizar o emprestimo
+      // em um app real, seria uma chamada de API
+      // await api.put(`/loans/${loanId}`, { returnDate: newReturnDate });
+      
+      // atualiza o empréstimo
       setLoans(prevLoans => 
         prevLoans.map(loan => 
           loan.id === loanId ? { ...loan, returnDate: newReturnDate } : loan
@@ -316,20 +347,27 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       
-      // achar o emprestimo
       const loan = loans.find(l => l.id === loanId);
       if (!loan) {
         throw new Error("Empréstimo não encontrado");
       }
       
-      // atualizar emprestimo
+      // atualiza a disponibilidade e quantidade do livro
       setBooks(prevBooks => 
-        prevBooks.map(book => 
-          book.id === loan.bookId ? { ...book, available: true } : book
-        )
+        prevBooks.map(book => {
+          if (book.id === loan.bookId) {
+            const newQuantity = book.availableQuantity + 1;
+            return {
+              ...book,
+              available: true,
+              availableQuantity: newQuantity
+            };
+          }
+          return book;
+        })
       );
       
-      // remover o emprestimo
+      // remove o empréstimo
       setLoans(prevLoans => prevLoans.filter(l => l.id !== loanId));
       
       toast({
