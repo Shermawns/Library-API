@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { 
   BookOpen, 
   BookPlus, 
-  Calendar, 
   Home, 
   LogOut, 
   Menu, 
@@ -20,7 +19,7 @@ const Layout = ({ children }: LayoutProps) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -36,15 +35,16 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* header */}
-      <header className="cmcb-header-gradient text-white shadow-md">
+      <header className="cmcb-header-gradient shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
+          <div className="relative flex justify-between items-center h-16">
+            {/* logo e botao menu mobile */}
             <div className="flex items-center">
               <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden p-2 rounded-md text-white hover:bg-cmcbDarkGreen focus:outline-none"
               >
-                {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
               <div className="flex-shrink-0 flex items-center">
                 <img
@@ -58,125 +58,75 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </div>
 
-            <div className="flex items-center">
-              <div className="hidden md:flex md:items-center md:ml-6">
-                <span className="text-sm font-medium text-white mr-4">
-                  Olá, {user?.name}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleLogout}
-                  className="flex items-center bg-white text-cmcbGreen hover:bg-gray-100 hover:text-cmcbDarkGreen"
+            {/* navegação do desktop */}
+            <nav className="hidden md:flex md:space-x-4">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                    location.pathname === item.path
+                      ? "bg-white text-cmcbGreen"
+                      : "text-white hover:bg-white/10"
+                  }`}
                 >
-                  <LogOut size={16} className="mr-2" />
-                  Sair
-                </Button>
-              </div>
+                  <span className="mr-2">{item.icon}</span>
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* menu do user e logout */}
+            <div className="flex items-center">
+              <span className="hidden md:block text-sm font-medium text-white mr-4">
+                Olá, {user?.name}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="flex items-center bg-white text-cmcbGreen hover:bg-gray-100 hover:text-cmcbDarkGreen"
+              >
+                <LogOut size={16} className="mr-2" />
+                Sair
+              </Button>
             </div>
           </div>
         </div>
-      </header>
 
-      <div className="flex flex-1">
-        {/* sidebar pro mobile */}
-        {sidebarOpen && (
-          <div className="fixed inset-0 flex z-40 md:hidden">
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)}></div>
-            
-            <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
-              <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-                <div className="flex-shrink-0 flex items-center px-4">
-                  <img
-                    className="h-12 w-auto"
-                    src="https://www.cm.cb.ce.gov.br/wp-content/uploads/sites/62/2018/11/logo-CMCB.png"
-                    alt="Logo Biblioteca CMCB"
-                  />
-                  <span className="ml-2 text-xl font-semibold text-cmcbGreen">
-                    Biblioteca CMCB
-                  </span>
-                </div>
-                <nav className="mt-5 px-2 space-y-1">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      className={`${
-                        location.pathname === item.path
-                          ? "bg-cmcbGreen text-white"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-cmcbGreen"
-                      } group flex items-center px-2 py-2 text-base font-medium rounded-md transition-colors duration-150`}
-                      onClick={() => setSidebarOpen(false)}
-                    >
-                      <span className="mr-3">{item.icon}</span>
-                      {item.label}
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-              <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-                <Button onClick={handleLogout} variant="ghost" className="flex items-center w-full text-cmcbGreen hover:text-cmcbDarkGreen">
-                  <LogOut size={16} className="mr-2" />
-                  Sair
-                </Button>
-              </div>
-              {/* footer gradient*/}
-              <div className="cmcb-footer-gradient w-full"></div>
+        {/* menu de navegação mobile */}
+        {mobileMenuOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-white/10">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
+                    location.pathname === item.path
+                      ? "bg-white text-cmcbGreen"
+                      : "text-white hover:bg-white/10"
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="mr-2">{item.icon}</span>
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </div>
         )}
+      </header>
 
-        {/* sidebar pra desktop */}
-        <div className="hidden md:flex md:flex-shrink-0">
-          <div className="flex flex-col w-64">
-            <div className="flex flex-col h-0 flex-1 border-r border-gray-200 bg-white">
-              <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-                <nav className="mt-5 flex-1 px-2 space-y-1">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      className={`${
-                        location.pathname === item.path
-                          ? "bg-cmcbGreen text-white"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-cmcbGreen"
-                      } group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150`}
-                    >
-                      <span className="mr-3">{item.icon}</span>
-                      {item.label}
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-              <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-                <div className="flex-shrink-0 w-full group block">
-                  <div className="flex items-center">
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                        {user?.name}
-                      </p>
-                      <p className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
-                        {user?.role === "ADMIN" ? "Administrador" : "Usuário"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="cmcb-footer-gradient w-full"></div>
-            </div>
-          </div>
+      {/* conteudo principal */}
+      <main className="flex-1 relative z-0 overflow-y-auto focus:outline-none py-6 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto animate-fade-in">
+          {children}
         </div>
-
-        {/* conteudo principal */}
-        <div className="flex flex-col w-0 flex-1 overflow-hidden bg-gray-50">
-          <main className="flex-1 relative z-0 overflow-y-auto focus:outline-none py-6 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto animate-fade-in">
-              {children}
-            </div>
-          </main>
-          <div className="cmcb-footer-gradient w-full"></div>
-        </div>
-      </div>
+      </main>
+      
+      {/* footer gradient */}
+      <div className="cmcb-footer-gradient w-full"></div>
     </div>
   );
 };
