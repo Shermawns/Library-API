@@ -1,15 +1,17 @@
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { 
-  BookOpen, 
-  BookPlus, 
-  Home, 
-  LogOut, 
-  Menu, 
-  X 
+import {
+  BookOpen,
+  BookPlus,
+  Home,
+  LogOut,
+  Menu,
+  X,
+  AlertTriangle
 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface LayoutProps {
   children: ReactNode;
@@ -20,6 +22,30 @@ const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [apiStatus, setApiStatus] = useState<'online' | 'offline' | 'checking'>('checking');
+
+  useEffect(() => {
+    const checkApiStatus = async () => {
+      try {
+        // Tenta conectar-se ao backend para verificar se está online
+        const response = await fetch('http://localhost:8080/api/health', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (response.ok) {
+          setApiStatus('online');
+        } else {
+          setApiStatus('offline');
+        }
+      } catch (error) {
+        console.error("Backend API não está disponível:", error);
+        setApiStatus('offline');
+      }
+    };
+
+    checkApiStatus();
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -34,11 +60,22 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* header */}
+      {/* API Status Alert */}
+      {apiStatus === 'offline' && (
+        <Alert variant="destructive" className="rounded-none">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            O servidor backend não está disponível. Algumas funcionalidades podem estar limitadas.
+            Verifique se o servidor Java está rodando em http://localhost:8080.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Header with CMCB gradient */}
       <header className="cmcb-header-gradient shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative flex justify-between items-center h-16">
-            {/* logo e botao menu mobile */}
+            {/* Logo and Mobile Menu Button */}
             <div className="flex items-center">
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -58,17 +95,16 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </div>
 
-            {/* navegação do desktop */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex md:space-x-4">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
-                    location.pathname === item.path
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${location.pathname === item.path
                       ? "bg-white text-cmcbGreen"
                       : "text-white hover:bg-white/10"
-                  }`}
+                    }`}
                 >
                   <span className="mr-2">{item.icon}</span>
                   {item.label}
@@ -76,7 +112,7 @@ const Layout = ({ children }: LayoutProps) => {
               ))}
             </nav>
 
-            {/* menu do user e logout */}
+            {/* User menu and logout */}
             <div className="flex items-center">
               <span className="hidden md:block text-sm font-medium text-white mr-4">
                 Olá, {user?.name}
@@ -94,7 +130,7 @@ const Layout = ({ children }: LayoutProps) => {
           </div>
         </div>
 
-        {/* menu de navegação mobile */}
+        {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-white/10">
@@ -102,11 +138,10 @@ const Layout = ({ children }: LayoutProps) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
-                    location.pathname === item.path
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${location.pathname === item.path
                       ? "bg-white text-cmcbGreen"
                       : "text-white hover:bg-white/10"
-                  }`}
+                    }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span className="mr-2">{item.icon}</span>
@@ -118,14 +153,14 @@ const Layout = ({ children }: LayoutProps) => {
         )}
       </header>
 
-      {/* conteudo principal */}
+      {/* Main content */}
       <main className="flex-1 relative z-0 overflow-y-auto focus:outline-none py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto animate-fade-in">
           {children}
         </div>
       </main>
-      
-      {/* footer gradient */}
+
+      {/* CMCB Footer Gradient */}
       <div className="cmcb-footer-gradient w-full"></div>
     </div>
   );

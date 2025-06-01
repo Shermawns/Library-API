@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useBooks } from "../contexts/BookContext";
 import { useNavigate } from "react-router-dom";
@@ -25,31 +24,31 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const BookLoans = () => {
-  const { loans, cancelLoan } = useBooks();
+  const { loans = [], cancelLoan } = useBooks();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedLoanId, setSelectedLoanId] = useState<string | null>(null);
   const { toast } = useToast();
-  
-  // Filtra emprestimos baseado na search query
-  const filteredLoans = loans.filter(loan => 
-    loan.bookTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    loan.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    loan.studentId.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
-  // checa se data de retorno passou
+  const filteredLoans = (loans || []).filter(loan => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      (loan.bookTitle?.toLowerCase() || '').includes(searchLower) ||
+      (loan.studentName?.toLowerCase() || '').includes(searchLower) ||
+      (loan.studentId?.toLowerCase() || '').includes(searchLower)
+    );
+  });
+
   const isOverdue = (returnDate: string) => {
     const today = new Date();
     const returnDay = new Date(returnDate);
     return returnDay < today;
   };
 
-  // pega o icone do status do pedido
   const getLoanStatus = (returnDate: string) => {
     const overdue = isOverdue(returnDate);
-    
+
     if (overdue) {
       return (
         <Badge variant="outline" className="bg-red-100 text-red-600 border-red-200">
@@ -58,12 +57,11 @@ const BookLoans = () => {
         </Badge>
       );
     }
-    
-    // calcula quantos dias falta
+
     const today = new Date();
     const returnDay = new Date(returnDate);
     const daysRemaining = Math.ceil((returnDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (daysRemaining <= 3) {
       return (
         <Badge variant="outline" className="bg-amber-100 text-amber-600 border-amber-200">
@@ -72,7 +70,7 @@ const BookLoans = () => {
         </Badge>
       );
     }
-    
+
     return (
       <Badge variant="outline" className="bg-green-100 text-green-600 border-green-200">
         <CheckCircle size={14} className="mr-1" />
@@ -121,7 +119,7 @@ const BookLoans = () => {
           />
         </div>
       </div>
-      
+
       {filteredLoans.length === 0 ? (
         <div className="text-center py-10 border rounded-lg bg-white">
           <p className="text-gray-500">Nenhum empréstimo encontrado</p>
@@ -180,13 +178,12 @@ const BookLoans = () => {
         </div>
       )}
 
-      {/* diálogo de confirmação para cancelar empréstimo */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Cancelar Empréstimo</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja cancelar este empréstimo? 
+              Tem certeza que deseja cancelar este empréstimo?
               Isto irá registrar a devolução do livro e disponibilizá-lo para novos empréstimos.
             </DialogDescription>
           </DialogHeader>
@@ -200,8 +197,9 @@ const BookLoans = () => {
             <Button
               variant="default"
               onClick={handleConfirmCancel}
+              className="bg-red-600 hover:bg-red-700"
             >
-              Confirmar
+              Confirmar Cancelamento
             </Button>
           </DialogFooter>
         </DialogContent>

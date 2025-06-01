@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -33,7 +32,7 @@ const App = () => (
               {/* rota public */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              
+
               {/* rota protected */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
@@ -41,10 +40,10 @@ const App = () => (
                 <Route path="/book-loans" element={<BookLoans />} />
                 <Route path="/extend-loan/:id" element={<ExtendLoan />} />
               </Route>
-              
+
               {/* redireciona root pro dashboard ou login */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              
+
               {/* 404 rota */}
               <Route path="*" element={<NotFound />} />
             </Routes>

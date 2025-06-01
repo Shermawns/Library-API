@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertCircle, Trash2, Clock } from "lucide-react";
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -28,7 +28,7 @@ const BookList = ({ books, onDelete, onLoan }: BookListProps) => {
 
   const confirmDelete = async () => {
     if (!bookToDelete) return;
-    
+
     setIsDeleting(true);
     try {
       await onDelete(bookToDelete.id);
@@ -40,7 +40,7 @@ const BookList = ({ books, onDelete, onLoan }: BookListProps) => {
 
   const isBookOverdue = (bookId: string) => {
     const currentDate = new Date();
-    return loans.some(loan => 
+    return loans.some(loan =>
       loan.bookId === bookId && new Date(loan.returnDate) < currentDate
     );
   };
@@ -59,69 +59,69 @@ const BookList = ({ books, onDelete, onLoan }: BookListProps) => {
         const isOverdue = isBookOverdue(book.id);
         const isAvailable = book.availableQuantity > 0;
         return (
-        <Card key={book.id} className="book-card overflow-hidden h-full flex flex-col">
-          <CardHeader className="pb-4">
-            <div className="flex justify-between items-start">
-              {isAvailable ? (
-                <Badge className="bg-green-100 text-green-600 border-green-200">
-                  <div className="flex items-center">
-                    <CheckCircle size={14} className="mr-1" />
-                    {book.availableQuantity} disponível{book.availableQuantity !== 1 ? 's' : ''}
-                  </div>
-                </Badge>
-              ) : isOverdue ? (
-                <Badge className="bg-red-100 text-red-600 border-red-200">
-                  <div className="flex items-center">
-                    <Clock size={14} className="mr-1" />
-                    Atrasado
-                  </div>
-                </Badge>
-              ) : (
-                <Badge className="bg-amber-100 text-amber-600 border-amber-200">
-                  <div className="flex items-center">
-                    <AlertCircle size={14} className="mr-1" />
-                    Indisponível
-                  </div>
-                </Badge>
-              )}
-              <div className="text-xs text-gray-500">ID: {book.id}</div>
-            </div>
-            <CardTitle className="mt-2 text-xl">{book.title}</CardTitle>
-            <CardDescription>
-              <div className="mt-2 text-sm text-gray-700">
-                <div className="font-medium">Autor: {book.author}</div>
-                <div>Editora: {book.publisher}</div>
-                <div>Ano: {book.year}</div>
-                <div>ISBN: {book.isbn}</div>
-                <div>Categoria: {book.category}</div>
+          <Card key={book.id} className="book-card overflow-hidden h-full flex flex-col">
+            <CardHeader className="pb-4">
+              <div className="flex justify-between items-start">
+                {isAvailable ? (
+                  <Badge className="bg-green-100 text-green-600 border-green-200">
+                    <div className="flex items-center">
+                      <CheckCircle size={14} className="mr-1" />
+                      {book.availableQuantity} disponível{book.availableQuantity !== 1 ? 's' : ''}
+                    </div>
+                  </Badge>
+                ) : isOverdue ? (
+                  <Badge className="bg-red-100 text-red-600 border-red-200">
+                    <div className="flex items-center">
+                      <Clock size={14} className="mr-1" />
+                      Atrasado
+                    </div>
+                  </Badge>
+                ) : (
+                  <Badge className="bg-amber-100 text-amber-600 border-amber-200">
+                    <div className="flex items-center">
+                      <AlertCircle size={14} className="mr-1" />
+                      Indisponível
+                    </div>
+                  </Badge>
+                )}
+                <div className="text-xs text-gray-500">ID: {book.id}</div>
               </div>
-            </CardDescription>
-          </CardHeader>
-          <CardFooter className="pt-0 mt-auto">
-            <div className="flex w-full justify-between">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setBookToDelete(book)}
-                className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
-              >
-                <Trash2 size={16} className="mr-1" />
-                Excluir
-              </Button>
-              <Button 
-                size="sm" 
-                disabled={!isAvailable}
-                onClick={() => isAvailable ? onLoan(book) : null}
-                className={!isAvailable ? "opacity-50 cursor-not-allowed" : ""}
-              >
-                {isAvailable ? "Emprestar" : "Indisponível"}
-              </Button>
-            </div>
-          </CardFooter>
-        </Card>
-      )})}
+              <CardTitle className="mt-2 text-xl">{book.title}</CardTitle>
+              <div className="text-sm text-muted-foreground">
+                <div className="mt-2 text-sm text-gray-700">
+                  <div className="font-medium">Autor: {book.author}</div>
+                  <div>Editora: {book.publisher}</div>
+                  <div>Ano: {book.year}</div>
+                  <div>ISBN: {book.isbn}</div>
+                  <div>Categoria: {book.category}</div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardFooter className="pt-0 mt-auto">
+              <div className="flex w-full justify-between">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setBookToDelete(book)}
+                  className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
+                >
+                  <Trash2 size={16} className="mr-1" />
+                  Excluir
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={!isAvailable}
+                  onClick={() => isAvailable ? onLoan(book) : null}
+                  className={!isAvailable ? "opacity-50 cursor-not-allowed" : ""}
+                >
+                  {isAvailable ? "Emprestar" : "Indisponível"}
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        )
+      })}
 
-      {/* diálogo de confirmação de exclusão */}
       <Dialog open={!!bookToDelete} onOpenChange={() => setBookToDelete(null)}>
         <DialogContent>
           <DialogHeader>
@@ -132,8 +132,8 @@ const BookList = ({ books, onDelete, onLoan }: BookListProps) => {
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBookToDelete(null)}>Cancelar</Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={confirmDelete}
               disabled={isDeleting}
             >

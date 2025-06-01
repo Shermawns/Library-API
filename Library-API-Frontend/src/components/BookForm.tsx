@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface BookFormProps {
   onSubmit: (book: BookFormData) => Promise<void>;
@@ -33,23 +35,55 @@ export interface BookFormData {
 }
 
 const categories = [
-  "Literatura Brasileira",
-  "Literatura Estrangeira",
-  "Infantil",
-  "Juvenil",
-  "Didático",
-  "Biografia",
-  "História",
-  "Ciências",
-  "Matemática",
-  "Filosofia",
-  "Sociologia",
-  "Geografia",
-  "Ensino Religioso",
-  "Artes",
-  "Educação Física",
-  "Outro",
+  "ROMANCE",
+  "FICCAO_CIENTIFICA",
+  "MISTERIO",
+  "HORROR",
+  "BIOGRAFIA",
+  "HISTORIA",
+  "FILOSOFIA",
+  "LITERATURA_INFANTIL",
+  "GIBI",
+  "TECNOLOGIA",
+  "PORTUGUES",
+  "LITERATURA",
+  "INGLES",
+  "BIOLOGIA",
+  "QUIMICA",
+  "FISICA",
+  "CIENCIAS",
+  "GEOGRAFIA",
+  "SOCIOLOGIA",
+  "MATEMATICA",
+  "INFORMATICA",
+  "OUTRO"
 ];
+
+// Mapeamento de categorias para exibição amigável
+const categoryDisplayNames: { [key: string]: string } = {
+  ROMANCE: "Romance",
+  FICCAO_CIENTIFICA: "Ficção Científica",
+  MISTERIO: "Mistério",
+  HORROR: "Horror",
+  BIOGRAFIA: "Biografia",
+  HISTORIA: "História",
+  FILOSOFIA: "Filosofia",
+  LITERATURA_INFANTIL: "Literatura Infantil",
+  GIBI: "Gibi/HQ",
+  TECNOLOGIA: "Tecnologia",
+  PORTUGUES: "Português",
+  LITERATURA: "Literatura",
+  INGLES: "Inglês",
+  BIOLOGIA: "Biologia",
+  QUIMICA: "Química",
+  FISICA: "Física",
+  CIENCIAS: "Ciências",
+  GEOGRAFIA: "Geografia",
+  SOCIOLOGIA: "Sociologia",
+  MATEMATICA: "Matemática",
+  INFORMATICA: "Informática",
+  OUTRO: "Outro"
+};
 
 const currentYear = new Date().getFullYear();
 
@@ -60,10 +94,12 @@ const BookForm = ({ onSubmit }: BookFormProps) => {
     publisher: "",
     year: currentYear,
     isbn: "",
-    category: "",
+    category: "LITERATURA",
     totalQuantity: 1
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -77,21 +113,59 @@ const BookForm = ({ onSubmit }: BookFormProps) => {
     setFormData((prev) => ({ ...prev, category: value }));
   };
 
+  const validateForm = () => {
+    if (!formData.title.trim()) {
+      throw new Error("O título é obrigatório");
+    }
+    if (!formData.author.trim()) {
+      throw new Error("O autor é obrigatório");
+    }
+    if (!formData.publisher.trim()) {
+      throw new Error("A editora é obrigatória");
+    }
+    if (!formData.isbn.trim()) {
+      throw new Error("O ISBN é obrigatório");
+    }
+    if (!formData.category) {
+      throw new Error("Por favor, selecione uma categoria para o livro");
+    }
+    if (!categories.includes(formData.category)) {
+      throw new Error("Categoria inválida. Por favor, selecione uma categoria válida");
+    }
+    if (formData.year < 1800 || formData.year > currentYear) {
+      throw new Error(`O ano deve estar entre 1800 e ${currentYear}`);
+    }
+    if (formData.totalQuantity < 1) {
+      throw new Error("A quantidade deve ser maior que zero");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
-      await onSubmit(formData);
-      setFormData({
-        title: "",
-        author: "",
-        publisher: "",
-        year: currentYear,
-        isbn: "",
-        category: "",
-        totalQuantity: 1
-      });
+      const bookData = {
+        title: formData.title,
+        author: formData.author,
+        publisher: formData.publisher,
+        year: parseInt(formData.year),
+        isbn: formData.isbn,
+        category: formData.category,
+        totalQuantity: parseInt(formData.totalQuantity)
+      };
+
+      await onSubmit(bookData);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Erro ao adicionar livro:", error);
+      if (error instanceof Error) {
+        toast({
+          title: "Erro",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -107,6 +181,12 @@ const BookForm = ({ onSubmit }: BookFormProps) => {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <span className="block sm:inline">{error}</span>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="title">Título</Label>
             <Input
@@ -131,33 +211,30 @@ const BookForm = ({ onSubmit }: BookFormProps) => {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="publisher">Editora</Label>
-              <Input
-                id="publisher"
-                name="publisher"
-                placeholder="Nome da editora"
-                required
-                value={formData.publisher}
-                onChange={handleChange}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="publisher">Editora</Label>
+            <Input
+              id="publisher"
+              name="publisher"
+              placeholder="Nome da editora"
+              required
+              value={formData.publisher}
+              onChange={handleChange}
+            />
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="year">Ano de Publicação</Label>
-              <Input
-                id="year"
-                name="year"
-                type="number"
-                placeholder="Ano"
-                required
-                min="1000"
-                max={currentYear}
-                value={formData.year}
-                onChange={handleChange}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="year">Ano de Publicação</Label>
+            <Input
+              id="year"
+              name="year"
+              type="number"
+              min={1800}
+              max={currentYear}
+              required
+              value={formData.year}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="space-y-2">
@@ -185,7 +262,7 @@ const BookForm = ({ onSubmit }: BookFormProps) => {
               <SelectContent>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
-                    {category}
+                    {categoryDisplayNames[category]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -193,13 +270,12 @@ const BookForm = ({ onSubmit }: BookFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="totalQuantity">Quantidade</Label>
+            <Label htmlFor="totalQuantity">Quantidade Total</Label>
             <Input
               id="totalQuantity"
               name="totalQuantity"
               type="number"
-              min="1"
-              placeholder="Quantidade de exemplares"
+              min={1}
               required
               value={formData.totalQuantity}
               onChange={handleChange}
@@ -207,7 +283,7 @@ const BookForm = ({ onSubmit }: BookFormProps) => {
           </div>
         </CardContent>
 
-        <CardFooter>
+        <CardFooter className="flex justify-end">
           <Button type="submit" disabled={loading}>
             {loading ? (
               <div className="flex items-center">

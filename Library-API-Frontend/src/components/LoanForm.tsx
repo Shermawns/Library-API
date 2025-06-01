@@ -83,7 +83,7 @@ const LoanForm = ({ book, onSubmit, onCancel }: LoanFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       await onSubmit(formData);
     } finally {
@@ -102,6 +102,20 @@ const LoanForm = ({ book, onSubmit, onCancel }: LoanFormProps) => {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="studentId">Matrícula do Aluno</Label>
+            <Input
+              id="studentId"
+              name="studentId"
+              placeholder="Número de matrícula"
+              required
+              pattern="[0-9]+"
+              title="A matrícula deve conter apenas números"
+              value={formData.studentId}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="studentName">Nome do Aluno</Label>
             <Input
               id="studentName"
@@ -109,18 +123,6 @@ const LoanForm = ({ book, onSubmit, onCancel }: LoanFormProps) => {
               placeholder="Nome completo do aluno"
               required
               value={formData.studentName}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="studentId">Matrícula do Aluno</Label>
-            <Input
-              id="studentId"
-              name="studentId"
-              placeholder="Número de matrícula"
-              required
-              value={formData.studentId}
               onChange={handleChange}
             />
           </div>

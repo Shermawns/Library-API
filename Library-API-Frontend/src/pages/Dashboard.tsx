@@ -5,7 +5,7 @@ import BookList from "../components/BookList";
 import SearchBar from "../components/SearchBar";
 import LoanForm, { LoanFormData } from "../components/LoanForm";
 import { Book } from "../contexts/BookContext";
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -30,33 +30,31 @@ const Dashboard = () => {
 
   const isBookOverdue = (bookId: string) => {
     const currentDate = new Date();
-    // encontrar todos os empréstimos deste livro
     const bookLoans = loans.filter(loan => loan.bookId === bookId);
-    // verificar se algum deles está atrasado
     return bookLoans.some(loan => new Date(loan.returnDate) < currentDate);
+  };
+
+  const hasActiveLoans = (bookId: string) => {
+    return loans.some(loan => loan.bookId === bookId);
   };
 
   const applyFilters = (query: string, filter: string) => {
     let result = searchBooks(query, showOnlyAvailable);
-    
+
     switch (filter) {
       case "available":
         result = result.filter(book => book.availableQuantity > 0);
         break;
       case "borrowed":
-        result = result.filter(book => book.availableQuantity < book.totalQuantity);
+        result = result.filter(book => hasActiveLoans(book.id));
         break;
       case "overdue":
-        // filtro de atrasados corrigido - não verifica mais se disponível < total, o que era redundante
-        result = result.filter(book => {
-          // um livro está atrasado se pelo menos um de seus empréstimos estiver com data de devolução vencida
-          return isBookOverdue(book.id);
-        });
+        result = result.filter(book => isBookOverdue(book.id));
         break;
       default:
         break;
     }
-    
+
     setFilteredBooks(result);
   };
 
@@ -77,7 +75,6 @@ const Dashboard = () => {
   };
 
   const handleLoanClick = (book: Book) => {
-    // só define o livro selecionado se ele estiver disponível
     if (book.availableQuantity > 0) {
       setSelectedBook(book);
     }
@@ -97,11 +94,11 @@ const Dashboard = () => {
             Digite o título, autor ou ID do livro para encontrá-lo rapidamente
           </p>
           <div className="space-y-4">
-            <SearchBar 
-              onSearch={handleSearch} 
+            <SearchBar
+              onSearch={handleSearch}
               className="max-w-3xl"
             />
-            
+
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-700">Filtrar por:</span>
               <ToggleGroup type="single" value={filterValue} onValueChange={handleFilterChange}>
@@ -127,9 +124,9 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <BookList 
-        books={filteredBooks} 
-        onDelete={handleDeleteBook} 
+      <BookList
+        books={filteredBooks}
+        onDelete={handleDeleteBook}
         onLoan={handleLoanClick}
       />
 

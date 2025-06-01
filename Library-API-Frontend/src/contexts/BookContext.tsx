@@ -1,7 +1,24 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useToast } from "@/hooks/use-toast";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  ReactNode,
+} from "react";
+import { bookService } from "../services/bookService";
+import { toast } from "@/components/ui/use-toast";
 
-// tipos
+export interface Loan {
+  id: string;
+  bookId: string;
+  bookTitle?: string;
+  studentName: string;
+  studentId: string;
+  studentGrade: string;
+  loanDate: string;
+  returnDate: string;
+}
+
 export interface Book {
   id: string;
   title: string;
@@ -10,397 +27,258 @@ export interface Book {
   year: number;
   isbn: string;
   category: string;
-  available: boolean;
   totalQuantity: number;
   availableQuantity: number;
+  available: boolean;
 }
 
-export interface Loan {
-  id: string;
+export interface BookFormData {
+  title: string;
+  author: string;
+  publisher: string;
+  year: string;
+  isbn: string;
+  category: string;
+  totalQuantity: string;
+}
+
+export interface LoanFormData {
   bookId: string;
-  bookTitle: string;
+  bookTitle?: string;
   studentName: string;
   studentId: string;
   studentGrade: string;
-  loanDate: string;
   returnDate: string;
 }
 
-interface BookContextType {
+interface BookContextProps {
   books: Book[];
   loans: Loan[];
   loading: boolean;
-  addBook: (book: Omit<Book, "id" | "available" | "availableQuantity">) => Promise<void>;
+  loadBooks: () => Promise<void>;
+  addBook: (bookData: BookFormData) => Promise<Book>;
   deleteBook: (id: string) => Promise<void>;
-  searchBooks: (query: string, onlyAvailable?: boolean) => Book[];
-  createLoan: (loan: Omit<Loan, "id" | "loanDate">) => Promise<void>;
-  extendLoan: (loanId: string, newReturnDate: string) => Promise<void>;
-  getBookById: (id: string) => Book | undefined;
-  getLoanById: (id: string) => Loan | undefined;
-  getBookLoans: (bookId: string) => Loan[];
+  searchBooks: (query: string, showOnlyAvailable: boolean) => Book[];
+  createLoan: (loanData: LoanFormData) => Promise<Loan>;
+  extendLoan: (loanId: string, newReturnDate: string) => Promise<Loan>;
   cancelLoan: (loanId: string) => Promise<void>;
 }
 
-const BookContext = createContext<BookContextType | undefined>(undefined);
+const BookContext = createContext<BookContextProps>({
+  books: [],
+  loans: [],
+  loading: false,
+  loadBooks: async () => { },
+  addBook: async () => { throw new Error("addBook function not implemented."); },
+  deleteBook: async () => { },
+  searchBooks: () => [],
+  createLoan: async () => { throw new Error("createLoan function not implemented."); },
+  extendLoan: async () => { throw new Error("extendLoan function not implemented."); },
+  cancelLoan: async () => { },
+});
 
-// atualiza livros iniciais com quantidade
-const initialBooks: Book[] = [
-  {
-    id: "1",
-    title: "Dom Casmurro",
-    author: "Machado de Assis",
-    publisher: "Moderna",
-    year: 1899,
-    isbn: "9788573261240",
-    category: "Literatura Brasileira",
-    available: true,
-    totalQuantity: 3,
-    availableQuantity: 3
-  },
-  {
-    id: "2",
-    title: "O Pequeno Príncipe",
-    author: "Antoine de Saint-Exupéry",
-    publisher: "Agir",
-    year: 1943,
-    isbn: "9788574801612",
-    category: "Literatura Estrangeira",
-    available: false,
-    totalQuantity: 2,
-    availableQuantity: 2
-  },
-  {
-    id: "3",
-    title: "Memórias Póstumas de Brás Cubas",
-    author: "Machado de Assis",
-    publisher: "Companhia das Letras",
-    year: 1881,
-    isbn: "9788535911145",
-    category: "Literatura Brasileira",
-    available: true,
-    totalQuantity: 4,
-    availableQuantity: 4
-  },
-  {
-    id: "4",
-    title: "Vidas Secas",
-    author: "Graciliano Ramos",
-    publisher: "Record",
-    year: 1938,
-    isbn: "9788501041845",
-    category: "Literatura Brasileira",
-    available: true,
-    totalQuantity: 5,
-    availableQuantity: 5
-  },
-  {
-    id: "5",
-    title: "Capitães da Areia",
-    author: "Jorge Amado",
-    publisher: "Companhia das Letras",
-    year: 1937,
-    isbn: "9788535911442",
-    category: "Literatura Brasileira",
-    available: false,
-    totalQuantity: 1,
-    availableQuantity: 1
-  }
-];
-
-const initialLoans: Loan[] = [
-  {
-    id: "1",
-    bookId: "2",
-    bookTitle: "O Pequeno Príncipe",
-    studentName: "Ana Silva",
-    studentId: "2023001",
-    studentGrade: "1º Ano - Ensino Médio",
-    loanDate: "2023-11-01",
-    returnDate: "2023-11-15"
-  },
-  {
-    id: "2",
-    bookId: "5",
-    bookTitle: "Capitães da Areia",
-    studentName: "Pedro Oliveira",
-    studentId: "2023045",
-    studentGrade: "3º Ano - Ensino Médio",
-    loanDate: "2023-11-05",
-    returnDate: "2023-11-19"
-  }
-];
-
-export const BookProvider = ({ children }: { children: ReactNode }) => {
+export const BookProvider = ({ children }: { children: React.ReactNode }) => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loans, setLoans] = useState<Loan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
 
-  // inicializa a partir do localStorage ou usa dados mockados
+  const loadBooks = async () => {
+    setLoading(true);
+    try {
+      const booksData = await bookService.getAllBooks();
+      setBooks(booksData);
+
+      const loansData = await bookService.getAllLoans();
+      const mappedLoans = loansData.map(loan => ({
+        ...loan,
+        id: loan.id || '',
+        loanDate: loan.loanDate || new Date().toISOString().split('T')[0],
+      }));
+      setLoans(mappedLoans as Loan[]);
+    } catch (error) {
+      console.error("Error loading books and loans:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os livros e empréstimos",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const storedBooks = localStorage.getItem("library_books");
-    const storedLoans = localStorage.getItem("library_loans");
-    
-    setBooks(storedBooks ? JSON.parse(storedBooks) : initialBooks);
-    setLoans(storedLoans ? JSON.parse(storedLoans) : initialLoans);
-    setLoading(false);
+    loadBooks();
   }, []);
 
-  // atualiza o localStorage quando livros ou empréstimos mudam
-  useEffect(() => {
-    if (books.length > 0) {
-      localStorage.setItem("library_books", JSON.stringify(books));
-    }
-  }, [books]);
-
-  useEffect(() => {
-    if (loans.length > 0) {
-      localStorage.setItem("library_loans", JSON.stringify(loans));
-    }
-  }, [loans]);
-
-  // operações de livro
-  const addBook = async (bookData: Omit<Book, "id" | "available" | "availableQuantity">) => {
+  const addBook = async (bookData: BookFormData) => {
     try {
-      setLoading(true);
-      
-      const newBook: Book = {
+      const newBook = await bookService.createBook({
         ...bookData,
-        id: Date.now().toString(),
-        available: bookData.totalQuantity > 0,
-        availableQuantity: bookData.totalQuantity
-      };
-      
-      setBooks(prevBooks => [...prevBooks, newBook]);
-      
-      toast({
-        title: "Livro adicionado",
-        description: `"${newBook.title}" foi adicionado à biblioteca`,
+        year: parseInt(bookData.year),
+        totalQuantity: parseInt(bookData.totalQuantity),
+        availableQuantity: parseInt(bookData.totalQuantity),
+        available: true,
       });
-    } catch (error) {
+      setBooks(prevBooks => [...prevBooks, newBook]);
       toast({
-        title: "Erro ao adicionar livro",
-        description: error instanceof Error ? error.message : "Não foi possível adicionar o livro",
+        title: "Sucesso",
+        description: "Livro adicionado com sucesso!",
+      });
+      return newBook;
+    } catch (error) {
+      console.error("Error adding book:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o livro",
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const deleteBook = async (id: string) => {
     try {
-      setLoading(true);
-      
-      // verifica se o livro está emprestado
-      const isOnLoan = loans.some(loan => loan.bookId === id);
-      if (isOnLoan) {
-        throw new Error("Não é possível excluir um livro que está emprestado");
-      }
-      
-      // em um app real, seria uma chamada de API
-      // await api.delete(`/books/${id}`);
-      
-      const bookToDelete = books.find(book => book.id === id);
-      
+      await bookService.deleteBook(id);
       setBooks(prevBooks => prevBooks.filter(book => book.id !== id));
-      
       toast({
-        title: "Livro removido",
-        description: bookToDelete 
-          ? `"${bookToDelete.title}" foi removido da biblioteca` 
-          : "Livro removido com sucesso",
+        title: "Sucesso",
+        description: "Livro removido com sucesso!",
       });
     } catch (error) {
+      console.error("Error deleting book:", error);
       toast({
-        title: "Erro ao remover livro",
-        description: error instanceof Error ? error.message : "Não foi possível remover o livro",
+        title: "Erro",
+        description: "Não foi possível remover o livro",
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
-  const searchBooks = (query: string, onlyAvailable: boolean = false) => {
-    if (!query.trim() && !onlyAvailable) return books;
-    
-    let filteredBooks = books;
-    
-    if (onlyAvailable) {
-      filteredBooks = filteredBooks.filter(book => book.availableQuantity > 0);
-    }
-    
-    if (query.trim()) {
-      const lowerCaseQuery = query.toLowerCase();
-      filteredBooks = filteredBooks.filter(book => 
-        book.title.toLowerCase().includes(lowerCaseQuery) || 
-        book.id.includes(lowerCaseQuery) ||
-        book.author.toLowerCase().includes(lowerCaseQuery) ||
-        book.isbn.includes(lowerCaseQuery)
+  const searchBooks = (query: string, showOnlyAvailable: boolean) => {
+    const searchLower = query.toLowerCase();
+    return books.filter(book => {
+      const matchesSearch = (
+        book.title.toLowerCase().includes(searchLower) ||
+        book.author.toLowerCase().includes(searchLower) ||
+        book.isbn.toLowerCase().includes(searchLower)
       );
-    }
-    
-    return filteredBooks;
+      return showOnlyAvailable ? matchesSearch && book.availableQuantity > 0 : matchesSearch;
+    });
   };
 
-  const getBookById = (id: string) => {
-    return books.find(book => book.id === id);
-  };
-
-  // operações de empréstimo
-  const createLoan = async (loanData: Omit<Loan, "id" | "loanDate">) => {
+  const createLoan = async (loanData: LoanFormData) => {
     try {
-      setLoading(true);
-      
       const book = books.find(b => b.id === loanData.bookId);
       if (!book) {
         throw new Error("Livro não encontrado");
       }
-      
       if (book.availableQuantity <= 0) {
-        throw new Error("Este livro não está disponível para empréstimo");
+        throw new Error("Livro não disponível para empréstimo");
       }
-      
-      const today = new Date().toISOString().split('T')[0];
-      
-      const newLoan: Loan = {
+
+      const newLoan = await bookService.createLoan({
         ...loanData,
-        id: Date.now().toString(),
-        loanDate: today
-      };
-      
-      // atualiza a disponibilidade e quantidade do livro
-      setBooks(prevBooks => 
-        prevBooks.map(b => {
-          if (b.id === loanData.bookId) {
-            const newQuantity = b.availableQuantity - 1;
-            return {
-              ...b,
-              available: newQuantity > 0,
-              availableQuantity: newQuantity
-            };
-          }
-          return b;
-        })
-      );
-      
-      setLoans(prevLoans => [...prevLoans, newLoan]);
-      
-      toast({
-        title: "Empréstimo registrado",
-        description: `"${book.title}" emprestado para ${loanData.studentName}`,
+        loanDate: new Date().toISOString().split('T')[0],
       });
-    } catch (error) {
+
+      setLoans(prevLoans => [...prevLoans, newLoan]);
+      setBooks(prevBooks =>
+        prevBooks.map(b =>
+          b.id === loanData.bookId
+            ? { ...b, availableQuantity: b.availableQuantity - 1 }
+            : b
+        )
+      );
+
       toast({
-        title: "Erro ao registrar empréstimo",
-        description: error instanceof Error ? error.message : "Não foi possível registrar o empréstimo",
+        title: "Sucesso",
+        description: "Empréstimo registrado com sucesso!",
+      });
+      return newLoan;
+    } catch (error) {
+      console.error("Error creating loan:", error);
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro ao registrar empréstimo",
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const extendLoan = async (loanId: string, newReturnDate: string) => {
     try {
-      setLoading(true);
-      
-      // em um app real, seria uma chamada de API
-      // await api.put(`/loans/${loanId}`, { returnDate: newReturnDate });
-      
-      // atualiza o empréstimo
-      setLoans(prevLoans => 
-        prevLoans.map(loan => 
+      const updatedLoan = await bookService.extendLoan(loanId, newReturnDate);
+      setLoans(prevLoans =>
+        prevLoans.map(loan =>
           loan.id === loanId ? { ...loan, returnDate: newReturnDate } : loan
         )
       );
-      
       toast({
-        title: "Empréstimo prorrogado",
-        description: `Data de devolução atualizada para ${new Date(newReturnDate).toLocaleDateString('pt-BR')}`,
+        title: "Sucesso",
+        description: "Data de devolução atualizada com sucesso!",
       });
+      return updatedLoan;
     } catch (error) {
+      console.error("Error extending loan:", error);
       toast({
-        title: "Erro ao prorrogar empréstimo",
-        description: error instanceof Error ? error.message : "Não foi possível prorrogar o empréstimo",
+        title: "Erro",
+        description: "Não foi possível atualizar a data de devolução",
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const getLoanById = (id: string) => {
-    return loans.find(loan => loan.id === id);
-  };
-
-  const getBookLoans = (bookId: string) => {
-    return loans.filter(loan => loan.bookId === bookId);
   };
 
   const cancelLoan = async (loanId: string) => {
     try {
-      setLoading(true);
-      
       const loan = loans.find(l => l.id === loanId);
       if (!loan) {
         throw new Error("Empréstimo não encontrado");
       }
-      
-      // atualiza a disponibilidade e quantidade do livro
-      setBooks(prevBooks => 
-        prevBooks.map(book => {
-          if (book.id === loan.bookId) {
-            const newQuantity = book.availableQuantity + 1;
-            return {
-              ...book,
-              available: true,
-              availableQuantity: newQuantity
-            };
-          }
-          return book;
-        })
-      );
-      
-      // remove o empréstimo
+
+      await bookService.cancelLoan(loanId);
       setLoans(prevLoans => prevLoans.filter(l => l.id !== loanId));
-      
+      setBooks(prevBooks =>
+        prevBooks.map(book =>
+          book.id === loan.bookId
+            ? { ...book, availableQuantity: book.availableQuantity + 1 }
+            : book
+        )
+      );
+
       toast({
-        title: "Empréstimo cancelado",
-        description: `O empréstimo de "${loan.bookTitle}" foi cancelado com sucesso`,
+        title: "Sucesso",
+        description: "Empréstimo cancelado com sucesso!",
       });
     } catch (error) {
+      console.error("Error canceling loan:", error);
       toast({
-        title: "Erro ao cancelar empréstimo",
-        description: error instanceof Error ? error.message : "Não foi possível cancelar o empréstimo",
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro ao cancelar empréstimo",
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <BookContext.Provider value={{
-      books,
-      loans,
-      loading,
-      addBook,
-      deleteBook,
-      searchBooks,
-      createLoan,
-      extendLoan,
-      getBookById,
-      getLoanById,
-      getBookLoans,
-      cancelLoan
-    }}>
+    <BookContext.Provider
+      value={{
+        books,
+        loans,
+        loading,
+        loadBooks,
+        addBook,
+        deleteBook,
+        searchBooks,
+        createLoan,
+        extendLoan,
+        cancelLoan,
+      }}
+    >
       {children}
     </BookContext.Provider>
   );
@@ -408,7 +286,7 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
 
 export const useBooks = () => {
   const context = useContext(BookContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useBooks must be used within a BookProvider");
   }
   return context;

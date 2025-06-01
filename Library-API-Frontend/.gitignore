@@ -7,6 +7,27 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build
+dist
+dist-ssr
+build
+coverage
+*.local
+.cache
+
+# Environment and Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editor directories and files
 node_modules
 dist
 dist-ssr
@@ -22,3 +43,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Testing
+/coverage
+.nyc_output
+
+# Misc
+.DS_Store
+*.pem
+.vercel
+.netlify

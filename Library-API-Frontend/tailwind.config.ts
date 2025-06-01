@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -62,6 +63,13 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
+        // Custom library colors
+        available: '#10b981', // Green for available books
+        borrowed: '#f59e0b', // Yellow for borrowed books
+        libraryRed: '#ef4444',
+        libraryBlue: '#3b82f6',
+        libraryGray: '#f3f4f6',
+        // CMCB Colors
         // cores custom das libs
         available: '#10b981', // verde livro disponivel
         borrowed: '#f59e0b', // amarelo livro emprestado

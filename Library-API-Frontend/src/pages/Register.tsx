@@ -4,9 +4,9 @@ import AuthForm from "../components/AuthForm";
 const Register = () => {
   const { register } = useAuth();
 
-  const handleRegister = async (data: { 
-    name: string; 
-    email: string; 
+  const handleRegister = async (data: {
+    name: string;
+    email: string;
     password: string;
     accessCode: string;
   }) => {

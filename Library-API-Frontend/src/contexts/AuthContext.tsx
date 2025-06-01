@@ -1,6 +1,6 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { authService } from "../services/authService";
 
 interface User {
   id: string;
@@ -25,48 +25,69 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // checa se o user ta logado no loading inicial
+  // Verificar autenticação ao carregar a página
   useEffect(() => {
-    const storedUser = localStorage.getItem("library_user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem("library_token");
+        if (token) {
+          const { user } = await authService.validateToken();
+          setUser(user);
+        }
+      } catch (error) {
+        // Token inválido, então removemos
+        localStorage.removeItem("library_token");
+        localStorage.removeItem("library_user");
+        setUser(null);
+        console.error("Erro ao validar token:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
-  // simular as calls da API com o local storage
-  // mudar apos o back-end
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      
-      
-      // simular resposta da api
-      
-      if (!email.includes('@')) {
-        throw new Error("Invalid email format");
-      }
-      
-      // user teste
-      const mockUser = {
-        id: "1",
-        name: email.split('@')[0],
-        email,
-        role: "ADMIN"
-      };
-      
-      // armazenar local storage
-      localStorage.setItem("library_user", JSON.stringify(mockUser));
-      
-      setUser(mockUser);
+
+      // Informar usuário sobre tentativa de login
       toast({
-        title: "Login successful",
-        description: "Welcome back to the library system",
+        title: "Conectando ao servidor",
+        description: "Tentando fazer login...",
       });
-    } catch (error) {
+
+      const { user, token } = await authService.login({ email, password });
+
+      localStorage.setItem("library_token", token);
+      localStorage.setItem("library_user", JSON.stringify(user));
+
+      setUser(user);
       toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "Invalid credentials",
+        title: "Login realizado com sucesso",
+        description: "Bem-vindo ao sistema da biblioteca",
+      });
+    } catch (error: any) {
+      console.error("Erro de login:", error);
+
+      let errorMessage = "Credenciais inválidas";
+
+      if (error?.code === 'ERR_NETWORK') {
+        errorMessage = "Não foi possível conectar ao servidor. Verifique se o backend está rodando em http://localhost:8080.";
+      } else if (error?.response?.status === 401) {
+        errorMessage = "Email ou senha incorretos.";
+      } else if (error?.response?.status === 403) {
+        errorMessage = "Acesso negado. Verifique suas credenciais.";
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      toast({
+        title: "Erro ao realizar login",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;
@@ -78,34 +99,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (name: string, email: string, password: string, accessCode: string) => {
     try {
       setLoading(true);
-      
-     
-      
-      // validar codigo de acesso(mudar depois de integrar o back)
-      if (accessCode !== "1234") { // Example access code
-        throw new Error("Invalid access code");
-      }
-      
-      // user teste 
-      const mockUser = {
-        id: "1",
+
+      const { user, token } = await authService.register({
         name,
         email,
-        role: "ADMIN"
-      };
-      
-      // armazenar no localStorage - esperar JWT 
-      localStorage.setItem("library_user", JSON.stringify(mockUser));
-      
-      setUser(mockUser);
-      toast({
-        title: "Registration successful",
-        description: "Your account has been created",
+        password,
+        accessCode
       });
-    } catch (error) {
+
+      localStorage.setItem("library_token", token);
+      localStorage.setItem("library_user", JSON.stringify(user));
+
+      setUser(user);
       toast({
-        title: "Registration failed",
-        description: error instanceof Error ? error.message : "Could not create account",
+        title: "Cadastro realizado com sucesso",
+        description: "Sua conta foi criada com sucesso",
+      });
+    } catch (error: any) {
+      console.error("Erro de registro:", error);
+
+      let errorMessage = "Não foi possível criar a conta";
+
+      if (error?.code === 'ERR_NETWORK') {
+        errorMessage = "Não foi possível conectar ao servidor. Verifique se o backend está rodando.";
+      } else if (error?.response?.status === 400) {
+        errorMessage = "Dados inválidos. Verifique se o email está no formato correto (@cm.cb.ce.gov.br) e se o código de acesso está correto.";
+      } else if (error?.response?.status === 403) {
+        errorMessage = "Código de registro inválido.";
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      toast({
+        title: "Erro ao realizar cadastro",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;
@@ -115,20 +144,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    localStorage.removeItem("library_token");
     localStorage.removeItem("library_user");
     setUser(null);
     toast({
-      title: "Logged out",
-      description: "You have been logged out successfully",
+      title: "Logout realizado com sucesso",
+      description: "Você saiu do sistema com sucesso",
     });
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      login, 
-      register, 
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      login,
+      register,
       logout,
       isAuthenticated: !!user
     }}>
@@ -139,7 +169,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
